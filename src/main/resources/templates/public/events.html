@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nadchodzące zawody – OrientApp</title>
+</head>
+<body>
+<main>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-calendar-event me-2"></i>Nadchodzące zawody</h1>
+    </div>
+
+    <div th:if="${#lists.isEmpty(events)}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Brak nadchodzących zawodów. Sprawdź ponownie później.
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" th:unless="${#lists.isEmpty(events)}">
+        <div class="col" th:each="event : ${events}">
+            <div class="card h-100 event-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0" th:text="${event.name}">Nazwa zawodów</h5>
+                        <span th:text="${event.status}"
+                              th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : 'bg-warning text-dark'"
+                              class="badge status-badge">STATUS</span>
+                    </div>
+                    <p class="card-text text-muted small mb-1">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        <span th:text="${#temporals.format(event.date, 'dd.MM.yyyy')}">01.01.2026</span>
+                    </p>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        <span th:text="${event.location}">Miejscowość</span>
+                    </p>
+                    <p class="card-text small" th:if="${event.description}"
+                       th:text="${#strings.abbreviate(event.description, 120)}">Opis</p>
+                    <p class="card-text small text-muted" th:unless="${event.description}">Brak opisu.</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a th:href="@{/events/{id}(id=${event.id})}"
+                       class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right me-1"></i>Szczegóły i rejestracja
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

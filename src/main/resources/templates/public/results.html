@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${event.name + ' – Wyniki – OrientApp'}">Wyniki – OrientApp</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active">Wyniki</li>
+        </ol>
+    </nav>
+
+    <h2 class="h4 mb-4">
+        <i class="bi bi-trophy me-2"></i>Wyniki –
+        <span th:text="${event.name}">Zawody</span>
+    </h2>
+
+    <div th:if="${resultsByCategory.isEmpty()}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Wyniki nie zostały jeszcze opublikowane.
+    </div>
+
+    <div th:each="entry : ${resultsByCategory}" class="mb-4">
+        <h5 class="fw-bold border-bottom pb-2 mb-3">
+            <i class="bi bi-signpost me-1"></i>
+            <span th:text="${entry.key.name}">Kategoria</span>
+            <small class="text-muted fw-normal ms-2"
+                   th:if="${entry.key.distanceKm != null}"
+                   th:text="${entry.key.distanceKm + ' km'}"></small>
+        </h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th style="width:3rem">M-ce</th>
+                    <th>Zawodnik</th>
+                    <th>Klub</th>
+                    <th>Chip</th>
+                    <th>Czas</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="result : ${entry.value}"
+                    th:classappend="${result.dnf} ? 'table-secondary'">
+                    <td class="text-center fw-bold">
+                        <span th:if="${result.place != null}" th:text="${result.place}">1</span>
+                        <span th:unless="${result.place != null}" class="text-muted">–</span>
+                    </td>
+                    <td th:text="${result.registration.competitor.fullName}">Zawodnik</td>
+                    <td class="text-muted small"
+                        th:text="${result.registration.competitor.club ?: '—'}">Klub</td>
+                    <td class="text-muted small"
+                        th:text="${result.registration.chipNumber ?: '—'}">Chip</td>
+                    <td>
+                        <span th:if="${result.dnf}" class="badge bg-secondary">DNF</span>
+                        <span th:unless="${result.dnf}" th:if="${result.finishTime != null}">
+                            <!-- format Duration HH:mm:ss -->
+                            <span th:with="
+                                h=${result.finishTime.toHours()},
+                                m=${result.finishTime.toMinutesPart()},
+                                s=${result.finishTime.toSecondsPart()}">
+                                <span th:text="${(h > 0 ? h + ':' : '') + #numbers.formatDecimal(m,2,0) + ':' + #numbers.formatDecimal(s,2,0)}">00:00</span>
+                            </span>
+                        </span>
+                        <span th:unless="${result.dnf}" th:unless="${result.finishTime != null}" class="text-muted">–</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>
