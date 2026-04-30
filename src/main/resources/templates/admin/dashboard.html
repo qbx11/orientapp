@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head><title>Dashboard – OrientApp Admin</title></head>
+<body>
+<main>
+    <h2 class="h4 mb-4">Dashboard</h2>
+
+    <!-- Statystyki -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-primary">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="bi bi-calendar-event fs-2"></i>
+                    <div>
+                        <div class="fs-3 fw-bold" th:text="${totalEvents}">0</div>
+                        <div class="small">Wszystkich zawodów</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-success">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="bi bi-calendar-check fs-2"></i>
+                    <div>
+                        <div class="fs-3 fw-bold" th:text="${openEvents}">0</div>
+                        <div class="small">Otwartych zawodów</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-warning">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="bi bi-hourglass-split fs-2"></i>
+                    <div>
+                        <div class="fs-3 fw-bold" th:text="${pendingCount}">0</div>
+                        <div class="small">Oczekujących zgłoszeń</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-secondary">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="bi bi-people fs-2"></i>
+                    <div>
+                        <div class="fs-3 fw-bold" th:text="${totalRegistrations}">0</div>
+                        <div class="small">Łącznie zgłoszeń</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Wykres Chart.js -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-bar-chart me-2"></i>Zgłoszenia per kategoria
+                </div>
+                <div class="card-body">
+                    <div th:if="${chartData.isEmpty()}" class="text-muted text-center py-4">
+                        Brak danych do wykresu.
+                    </div>
+                    <canvas id="regChart" th:unless="${chartData.isEmpty()}" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista zawodów -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="bi bi-list-ul me-2"></i>Wszystkie zawody</span>
+                    <a th:href="@{/admin/events/new}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+                <div th:if="${events.isEmpty()}" class="card-body text-muted">Brak zawodów.</div>
+                <ul class="list-group list-group-flush" th:unless="${events.isEmpty()}">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        th:each="event : ${events}">
+                        <div>
+                            <a th:href="@{/admin/events/{id}/edit(id=${event.id})}"
+                               class="fw-semibold text-decoration-none" th:text="${event.name}">Zawody</a>
+                            <div class="text-muted small"
+                                 th:text="${#temporals.format(event.date, 'dd.MM.yyyy') + ' · ' + event.location}"></div>
+                        </div>
+                        <span th:text="${event.status}"
+                              th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'DRAFT'} ? 'bg-warning text-dark' : 'bg-secondary')"
+                              class="badge">STATUS</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script th:if="${!chartData.isEmpty()}" th:inline="javascript">
+        const labels = /*[[${chartData.keySet()}]]*/ [];
+        const data   = /*[[${chartData.values()}]]*/ [];
+        new Chart(document.getElementById('regChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Zgłoszenia',
+                    data: data,
+                    backgroundColor: 'rgba(13,110,253,.7)',
+                    borderColor: 'rgba(13,110,253,1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    </script>
+</main>
+</body>
+</html>

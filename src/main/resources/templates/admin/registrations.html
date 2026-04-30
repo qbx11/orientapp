@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head><title th:text="${event.name + ' – Zgłoszenia – Admin'}">Zgłoszenia – Admin</title></head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/events}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/events/{id}/edit(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active">Zgłoszenia</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="h4 mb-0">
+            Zgłoszenia –
+            <span th:text="${event.name}">Zawody</span>
+        </h2>
+        <span th:text="${event.status}"
+              th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'DRAFT'} ? 'bg-warning text-dark' : 'bg-secondary')"
+              class="badge fs-6">STATUS</span>
+    </div>
+
+    <div th:if="${registrationsByCategory.isEmpty()}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Brak zgłoszeń dla tych zawodów.
+    </div>
+
+    <div th:each="entry : ${registrationsByCategory}" class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-signpost"></i>
+            <span class="fw-semibold" th:text="${entry.key.name}">Kategoria</span>
+            <span class="text-muted small" th:if="${entry.key.distanceKm != null}"
+                  th:text="${entry.key.distanceKm + ' km'}"></span>
+            <span class="badge bg-secondary ms-auto"
+                  th:text="${entry.value.size() + ' zgłoszeń'}">0</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Zawodnik</th>
+                    <th>Klub</th>
+                    <th>Chip</th>
+                    <th>Data zgłoszenia</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reg : ${entry.value}">
+                    <td class="fw-semibold" th:text="${reg.competitor.fullName}">Zawodnik</td>
+                    <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
+                    <td class="text-muted small" th:text="${reg.chipNumber ?: '—'}">Chip</td>
+                    <td class="text-muted small"
+                        th:text="${#temporals.format(reg.registeredAt, 'dd.MM.yyyy HH:mm')}">Data</td>
+                    <td>
+                        <span th:text="${reg.status}"
+                              th:classappend="${reg.status.name() == 'APPROVED'} ? 'bg-success' : (${reg.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
+                              class="badge">STATUS</span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1 justify-content-end"
+                             th:if="${reg.status.name() == 'PENDING'}">
+                            <form th:action="@{/admin/registrations/{id}/approve(id=${reg.id})}"
+                                  method="post">
+                                <input type="hidden" name="eventId" th:value="${event.id}"/>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-lg me-1"></i>Zatwierdź
+                                </button>
+                            </form>
+                            <form th:action="@{/admin/registrations/{id}/reject(id=${reg.id})}"
+                                  method="post">
+                                <input type="hidden" name="eventId" th:value="${event.id}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x-lg me-1"></i>Odrzuć
+                                </button>
+                            </form>
+                        </div>
+                        <span th:unless="${reg.status.name() == 'PENDING'}"
+                              class="text-muted small">—</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

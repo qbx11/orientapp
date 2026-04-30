@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head><title>Zawody – OrientApp Admin</title></head>
+<body>
+<main>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="h4 mb-0">Zarządzanie zawodami</h2>
+        <a th:href="@{/admin/events/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Nowe zawody
+        </a>
+    </div>
+
+    <div th:if="${events.isEmpty()}" class="alert alert-info">
+        Brak zawodów. <a th:href="@{/admin/events/new}">Utwórz pierwsze zawody.</a>
+    </div>
+
+    <div class="card" th:unless="${events.isEmpty()}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Data</th>
+                    <th>Lokalizacja</th>
+                    <th>Status</th>
+                    <th>Kategorie</th>
+                    <th>Zgłoszenia</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="event : ${events}">
+                    <td class="fw-semibold" th:text="${event.name}">Nazwa</td>
+                    <td th:text="${#temporals.format(event.date, 'dd.MM.yyyy')}">Data</td>
+                    <td th:text="${event.location}">Lokalizacja</td>
+                    <td>
+                        <span th:text="${event.status}"
+                              th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'DRAFT'} ? 'bg-warning text-dark' : 'bg-secondary')"
+                              class="badge">STATUS</span>
+                    </td>
+                    <td class="text-center" th:text="${event.categories.size()}">0</td>
+                    <td class="text-center" th:text="${event.registrations.size()}">0</td>
+                    <td>
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a th:href="@{/admin/events/{id}/edit(id=${event.id})}"
+                               class="btn btn-sm btn-outline-secondary" title="Edytuj">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/admin/events/{id}/registrations(id=${event.id})}"
+                               class="btn btn-sm btn-outline-primary" title="Zgłoszenia">
+                                <i class="bi bi-people"></i>
+                            </a>
+                            <a th:href="@{/admin/events/{id}/results(id=${event.id})}"
+                               class="btn btn-sm btn-outline-success" title="Wyniki">
+                                <i class="bi bi-trophy"></i>
+                            </a>
+                            <form th:action="@{/admin/events/{id}/delete(id=${event.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Usunąć zawody \'' + this.dataset.name + '\'?')"
+                                  th:data-name="${event.name}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Usuń">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

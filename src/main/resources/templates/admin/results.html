@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head><title th:text="${event.name + ' – Wyniki – Admin'}">Wyniki – Admin</title></head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/events}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/events/{id}/edit(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active">Panel wyników</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-trophy me-2"></i>Panel wyników –
+            <span th:text="${event.name}">Zawody</span>
+        </h2>
+        <a th:href="@{/events/{id}/results(id=${event.id})}" class="btn btn-outline-secondary btn-sm"
+           target="_blank">
+            <i class="bi bi-eye me-1"></i>Podgląd publiczny
+        </a>
+    </div>
+
+    <div th:if="${registrationsByCategory.isEmpty()}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Brak zgłoszeń. Najpierw zatwierdź rejestracje.
+    </div>
+
+    <div th:each="entry : ${registrationsByCategory}" class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-signpost"></i>
+            <span class="fw-semibold" th:text="${entry.key.name}">Kategoria</span>
+            <span class="text-muted small" th:if="${entry.key.distanceKm != null}"
+                  th:text="${entry.key.distanceKm + ' km'}"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th style="width:3rem">M-ce</th>
+                    <th>Zawodnik</th>
+                    <th>Klub</th>
+                    <th>Status zg.</th>
+                    <th style="width:150px">Czas (HH:mm:ss)</th>
+                    <th style="width:80px">DNF</th>
+                    <th style="width:80px"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reg : ${entry.value}">
+                    <!-- Miejsce z istniejącego wyniku -->
+                    <td class="text-center fw-bold">
+                        <span th:if="${reg.result != null and reg.result.place != null}"
+                              th:text="${reg.result.place}">1</span>
+                        <span th:unless="${reg.result != null and reg.result.place != null}"
+                              class="text-muted">–</span>
+                    </td>
+                    <td th:text="${reg.competitor.fullName}">Zawodnik</td>
+                    <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
+                    <td>
+                        <span th:text="${reg.status}"
+                              th:classappend="${reg.status.name() == 'APPROVED'} ? 'bg-success' : (${reg.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
+                              class="badge small">STATUS</span>
+                    </td>
+
+                    <!-- Formularz wyniku per wiersz -->
+                    <td colspan="3">
+                        <form th:action="@{/admin/results}" method="post"
+                              class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="registrationId" th:value="${reg.id}"/>
+                            <input type="hidden" name="eventId" th:value="${event.id}"/>
+                            <input type="time" step="1" name="finishTime" class="form-control form-control-sm"
+                                   style="width:130px"
+                                   th:value="${reg.result != null and reg.result.finishTime != null}
+                                       ? ${#strings.toString(reg.result.finishTime.toHours()) + ':' +
+                                          #numbers.formatDecimal(reg.result.finishTime.toMinutesPart(),2,0) + ':' +
+                                          #numbers.formatDecimal(reg.result.finishTime.toSecondsPart(),2,0)}
+                                       : ''"/>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="checkbox" name="dnf" value="true"
+                                       id="dnf_[[${reg.id}]]"
+                                       th:checked="${reg.result != null and reg.result.dnf}"/>
+                                <label class="form-check-label small" th:for="'dnf_' + ${reg.id}">DNF</label>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-floppy"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>
