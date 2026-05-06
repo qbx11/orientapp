@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Błąd serwera – OrientApp</title>
+</head>
+<body>
+<main>
+    <div class="text-center py-5">
+        <div class="display-1 fw-bold text-muted">500</div>
+        <h2 class="mt-3" th:text="${errorTitle} ?: 'Błąd serwera'">Błąd serwera</h2>
+        <p class="text-muted" th:text="${errorMessage} ?: 'Wystąpił nieoczekiwany błąd.'">Wystąpił nieoczekiwany błąd.</p>
+        <a th:href="@{/}" class="btn btn-primary mt-3">
+            <i class="bi bi-house me-1"></i>Wróć na stronę główną
+        </a>
+    </div>
+</main>
+</body>
+</html>
