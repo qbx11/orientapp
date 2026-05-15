@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base-map :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${registration.competitor.fullName + ' – Trasa – OrientApp'}">Trasa – OrientApp</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/events/{id}/results(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active" th:text="${registration.competitor.fullName}">Zawodnik</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Mapa -->
+            <div class="card">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-map me-2"></i>Trasa zawodnika
+                </div>
+                <div class="card-body p-2">
+                    <div id="map"></div>
+                </div>
+                <div class="card-footer text-muted small" th:if="${#lists.isEmpty(trackPoints)}">
+                    <i class="bi bi-info-circle me-1"></i>Brak zarejestrowanych punktów trasy.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Info o rejestracji -->
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-person me-2"></i>Zawodnik
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0 small">
+                        <dt class="col-5">Imię i nazwisko</dt>
+                        <dd class="col-7" th:text="${registration.competitor.fullName}">—</dd>
+                        <dt class="col-5">Klub</dt>
+                        <dd class="col-7" th:text="${registration.competitor.club ?: '—'}">—</dd>
+                        <dt class="col-5">Kategoria</dt>
+                        <dd class="col-7" th:text="${registration.category.name}">—</dd>
+                        <dt class="col-5">Chip SI</dt>
+                        <dd class="col-7" th:text="${registration.chipNumber ?: '—'}">—</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Lista punktów – wypełniana przez JS z obliczonymi czasami split -->
+            <div class="card" th:unless="${#lists.isEmpty(trackPoints)}">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-list-ol me-2"></i>Punkty kontrolne
+                    <span class="badge bg-secondary ms-1" th:text="${#lists.size(trackPoints)}">0</span>
+                </div>
+                <ul id="checkpointList" class="list-group list-group-flush"
+                    style="max-height:360px;overflow-y:auto"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const trackPoints = /*[[${trackPoints}]]*/ [];
+
+        function fmtTime(isoStr) {
+            return isoStr.replace('T', ' ').substring(0, 19);
+        }
+        function fmtSplit(ms) {
+            if (ms == null) return '—';
+            const totalSec = Math.round(ms / 1000);
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return '+' + m + ':' + String(s).padStart(2, '0');
+        }
+
+        // Wypełnij listę punktów z czasami split
+        const list = document.getElementById('checkpointList');
+        if (list && trackPoints.length > 0) {
+            trackPoints.forEach((tp, i) => {
+                const order = tp.checkpointOrder != null ? tp.checkpointOrder : (i + 1);
+                const ts = new Date(tp.timestamp);
+                const prevTs = i > 0 ? new Date(trackPoints[i - 1].timestamp) : null;
+                const splitMs = prevTs ? ts - prevTs : null;
+
+                let label, labelStyle;
+                if (i === 0) { label = 'START'; labelStyle = 'background:#198754'; }
+                else if (i === trackPoints.length - 1) { label = 'META'; labelStyle = 'background:#dc3545'; }
+                else { label = order; labelStyle = 'background:#0d6efd'; }
+
+                const li = document.createElement('li');
+                li.className = 'list-group-item py-2 px-3 small';
+                li.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <span style="${labelStyle};color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;font-size:10px;font-weight:700;margin-right:6px">${label}</span>
+                            <span class="text-muted">${fmtTime(tp.timestamp)}</span>
+                        </span>
+                        <span class="fw-semibold text-success">${fmtSplit(splitMs)}</span>
+                    </div>`;
+                list.appendChild(li);
+            });
+        }
+
+        window.addEventListener('load', function () {
+            const map = L.map('map');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            if (trackPoints.length > 0) {
+                const latLngs = trackPoints.map(p => [p.lat, p.lng]);
+                L.polyline(latLngs, { color: '#0d6efd', weight: 4, opacity: 0.8 }).addTo(map);
+
+                const startIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="background:#198754;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">S</div>',
+                    iconSize: [28, 28], iconAnchor: [14, 14]
+                });
+                const finishIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="background:#dc3545;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">M</div>',
+                    iconSize: [28, 28], iconAnchor: [14, 14]
+                });
+
+                trackPoints.forEach((tp, i) => {
+                    const order = tp.checkpointOrder != null ? tp.checkpointOrder : (i + 1);
+                    const ts = new Date(tp.timestamp);
+                    const prevTs = i > 0 ? new Date(trackPoints[i - 1].timestamp) : null;
+                    const split = prevTs ? fmtSplit(ts - prevTs) : '—';
+
+                    let icon;
+                    if (i === 0) icon = startIcon;
+                    else if (i === trackPoints.length - 1) icon = finishIcon;
+                    else icon = L.divIcon({
+                        className: '',
+                        html: `<div style="background:#0d6efd;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${order}</div>`,
+                        iconSize: [24, 24], iconAnchor: [12, 12]
+                    });
+
+                    L.marker([tp.lat, tp.lng], { icon })
+                        .addTo(map)
+                        .bindPopup(`<strong>KP ${order}</strong><br>Czas: ${fmtTime(tp.timestamp)}<br>Split: <strong>${split}</strong><br><small class="text-muted">${tp.lat.toFixed(5)}, ${tp.lng.toFixed(5)}</small>`);
+                });
+
+                map.fitBounds(latLngs, { padding: [30, 30] });
+            } else {
+                map.setView([52.0, 19.0], 6);
+            }
+        });
+        /*]]>*/
+    </script>
+</main>
+</body>
+</html>

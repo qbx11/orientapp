@@ -6,57 +6,47 @@
 </head>
 <body>
 <main>
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/}">Zawody</a></li>
             <li class="breadcrumb-item active" th:text="${event.name}">Zawody</li>
         </ol>
     </nav>
 
-    <!-- Alerty -->
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle me-2"></i>
-        <span th:text="${successMessage}"></span>
+        <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <span th:text="${errorMessage}"></span>
+        <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <div class="row g-4">
-        <!-- Info o zawodach -->
+        <!-- Lewa kolumna: info + kategorie -->
         <div class="col-lg-7">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0" th:text="${event.name}">Nazwa</h4>
-                    <span th:text="${event.status}"
+                    <span th:text="${event.status.label}"
                           th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'CLOSED'} ? 'bg-secondary' : 'bg-warning text-dark')"
-                          class="badge status-badge">STATUS</span>
+                          class="badge status-badge">Status</span>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
                         <dt class="col-sm-4"><i class="bi bi-calendar3 me-1"></i>Data</dt>
                         <dd class="col-sm-8" th:text="${#temporals.format(event.date, 'dd MMMM yyyy', new java.util.Locale('pl'))}">Data</dd>
-
                         <dt class="col-sm-4"><i class="bi bi-geo-alt me-1"></i>Miejsce</dt>
                         <dd class="col-sm-8" th:text="${event.location}">Miejsce</dd>
-
                         <dt class="col-sm-4" th:if="${event.description}">Opis</dt>
                         <dd class="col-sm-8" th:if="${event.description}" th:text="${event.description}">Opis</dd>
                     </dl>
-                </div>
-                <div class="card-footer">
-                    <a th:href="@{/events/{id}/results(id=${event.id})}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-trophy me-1"></i>Wyniki
-                    </a>
                 </div>
             </div>
 
             <!-- Kategorie -->
             <div class="card mt-3">
-                <div class="card-header"><h5 class="mb-0">Kategorie tras</h5></div>
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-signpost me-2"></i>Kategorie tras</h5></div>
                 <div th:if="${#lists.isEmpty(categories)}" class="card-body text-muted">
                     Brak zdefiniowanych kategorii.
                 </div>
@@ -69,72 +59,74 @@
                     </li>
                 </ul>
             </div>
-
-            <!-- Karta pogody -->
-            <div class="mt-3" th:if="${event.latitude != null}"
-                 th:replace="~{fragments/weather-card :: weatherCard}"></div>
         </div>
 
-        <!-- Formularz rejestracji -->
+        <!-- Prawa kolumna: przyciski + mapa -->
         <div class="col-lg-5">
-            <div class="card" th:if="${event.status.name() == 'OPEN'}">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Rejestracja</h5>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/events/{id}/register(id=${event.id})}"
-                          th:object="${registrationForm}" method="post" novalidate>
-                        <div class="mb-3">
-                            <label for="fullName" class="form-label">Imię i nazwisko <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="fullName"
-                                   th:field="*{fullName}"
-                                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
-                                   placeholder="Jan Kowalski"/>
-                            <div class="invalid-feedback" th:errors="*{fullName}"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="club" class="form-label">Klub sportowy</label>
-                            <input type="text" class="form-control" id="club"
-                                   th:field="*{club}" placeholder="np. KS Azymut"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="chipNumber" class="form-label">Numer chipa SI <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="chipNumber"
-                                   th:field="*{chipNumber}"
-                                   th:classappend="${#fields.hasErrors('chipNumber')} ? 'is-invalid'"
-                                   placeholder="np. 123456"/>
-                            <div class="invalid-feedback" th:errors="*{chipNumber}"></div>
-                            <div class="form-text">6–8 cyfr</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="categoryId" class="form-label">Kategoria <span class="text-danger">*</span></label>
-                            <select class="form-select" id="categoryId"
-                                    th:field="*{categoryId}"
-                                    th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
-                                <option value="">-- wybierz kategorię --</option>
-                                <option th:each="cat : ${categories}"
-                                        th:value="${cat.id}"
-                                        th:text="${cat.name + (cat.distanceKm != null ? ' (' + cat.distanceKm + ' km)' : '')}">
-                                    Kategoria
-                                </option>
-                            </select>
-                            <div class="invalid-feedback" th:errors="*{categoryId}"></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-send me-1"></i>Wyślij zgłoszenie
-                        </button>
-                    </form>
-                </div>
+            <!-- Przyciski akcji -->
+            <div class="d-grid gap-2 mb-3">
+                <!-- OPEN: rejestracja + regulamin, bez wyników -->
+                <th:block th:if="${event.status.name() == 'OPEN'}">
+                    <a th:href="@{/events/{id}/register(id=${event.id})}"
+                       class="btn btn-success btn-lg">
+                        <i class="bi bi-pencil-square me-2"></i>Zarejestruj się
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-file-text me-2"></i>Regulamin zawodów
+                    </a>
+                </th:block>
+
+                <!-- DRAFT: info + regulamin, bez rejestracji i wyników -->
+                <th:block th:if="${event.status.name() == 'DRAFT'}">
+                    <div class="alert alert-warning mb-2">
+                        <i class="bi bi-clock me-2"></i>Zapisy zostaną otwarte wkrótce.
+                    </div>
+                    <a href="#" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-file-text me-2"></i>Regulamin zawodów
+                    </a>
+                </th:block>
+
+                <!-- CLOSED: wyniki, bez rejestracji -->
+                <th:block th:if="${event.status.name() == 'CLOSED'}">
+                    <a th:href="@{/events/{id}/results(id=${event.id})}"
+                       class="btn btn-success btn-lg">
+                        <i class="bi bi-trophy me-2"></i>Wyniki zawodów
+                    </a>
+                </th:block>
             </div>
 
-            <div class="card" th:unless="${event.status.name() == 'OPEN'}">
-                <div class="card-body text-center text-muted py-5">
-                    <i class="bi bi-lock display-4"></i>
-                    <p class="mt-3 mb-0">Rejestracja jest zamknięta.</p>
+            <!-- Mapa lokalizacji -->
+            <div class="card" th:if="${event.latitude != null}">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-map me-2"></i>Lokalizacja
+                    <small class="text-muted fw-normal ms-1" th:text="${event.location}"></small>
+                </div>
+                <div class="card-body p-2">
+                    <div id="event-map" style="height:280px;width:100%;"></div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script th:if="${event.latitude != null}" th:inline="javascript">
+        /*<![CDATA[*/
+        window.addEventListener('load', function () {
+            const lat = /*[[${event.latitude}]]*/ 52.0;
+            const lng = /*[[${event.longitude}]]*/ 19.0;
+            const locationName = /*[[${event.location}]]*/ '';
+
+            const map = L.map('event-map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(map);
+            L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup('<strong>' + locationName + '</strong>')
+                .openPopup();
+        });
+        /*]]>*/
+    </script>
 </main>
 </body>
 </html>

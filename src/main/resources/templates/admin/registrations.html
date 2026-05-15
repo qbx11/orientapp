@@ -19,7 +19,7 @@
             Zgłoszenia –
             <span th:text="${event.name}">Zawody</span>
         </h2>
-        <span th:text="${event.status}"
+        <span th:text="${event.status.label}"
               th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'DRAFT'} ? 'bg-warning text-dark' : 'bg-secondary')"
               class="badge fs-6">STATUS</span>
     </div>
@@ -57,7 +57,7 @@
                     <td class="text-muted small"
                         th:text="${#temporals.format(reg.registeredAt, 'dd.MM.yyyy HH:mm')}">Data</td>
                     <td>
-                        <span th:text="${reg.status}"
+                        <span th:text="${reg.status.label}"
                               th:classappend="${reg.status.name() == 'APPROVED'} ? 'bg-success' : (${reg.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
                               class="badge">STATUS</span>
                     </td>
@@ -79,8 +79,12 @@
                                 </button>
                             </form>
                         </div>
+                        <a th:href="@{/admin/registrations/{id}/track(id=${reg.id})}"
+                           class="btn btn-sm btn-outline-secondary ms-1" title="Trasa">
+                            <i class="bi bi-map"></i>
+                        </a>
                         <span th:unless="${reg.status.name() == 'PENDING'}"
-                              class="text-muted small">—</span>
+                              class="text-muted small"></span>
                     </td>
                 </tr>
                 </tbody>

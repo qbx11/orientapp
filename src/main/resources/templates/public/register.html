@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Rejestracja – ' + ${event.name} + ' – OrientApp'">Rejestracja – OrientApp</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active">Rejestracja</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Formularz zgłoszeniowy</h5>
+                    <small class="opacity-75" th:text="${event.name + ' · ' + #temporals.format(event.date, 'dd.MM.yyyy')}"></small>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/events/{id}/register(id=${event.id})}"
+                          th:object="${registrationForm}" method="post" novalidate>
+
+                        <!-- Dane osobowe -->
+                        <h6 class="text-muted fw-semibold mb-3 text-uppercase small">Dane osobowe</h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="firstName" class="form-label">Imię <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="firstName"
+                                       th:field="*{firstName}"
+                                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
+                                       placeholder="Jan" autocomplete="given-name"/>
+                                <div class="invalid-feedback" th:errors="*{firstName}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="lastName" class="form-label">Nazwisko <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lastName"
+                                       th:field="*{lastName}"
+                                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
+                                       placeholder="Kowalski" autocomplete="family-name"/>
+                                <div class="invalid-feedback" th:errors="*{lastName}"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dateOfBirth" class="form-label">Data urodzenia <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="dateOfBirth"
+                                   th:field="*{dateOfBirth}"
+                                   th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid'"
+                                   autocomplete="bday"/>
+                            <div class="invalid-feedback" th:errors="*{dateOfBirth}"></div>
+                        </div>
+
+                        <!-- Kontakt -->
+                        <h6 class="text-muted fw-semibold mb-3 mt-4 text-uppercase small">Kontakt</h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="email" class="form-label">Adres e-mail <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email"
+                                       th:field="*{email}"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                       placeholder="jan@example.com" autocomplete="email"/>
+                                <div class="invalid-feedback" th:errors="*{email}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="phone" class="form-label">Telefon</label>
+                                <input type="tel" class="form-control" id="phone"
+                                       th:field="*{phone}"
+                                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
+                                       placeholder="+48 600 000 000" autocomplete="tel"
+                                       inputmode="tel"/>
+                                <div class="invalid-feedback" th:errors="*{phone}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Dane startowe -->
+                        <h6 class="text-muted fw-semibold mb-3 mt-4 text-uppercase small">Dane startowe</h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="club" class="form-label">Klub sportowy</label>
+                                <input type="text" class="form-control" id="club"
+                                       th:field="*{club}" placeholder="np. KS Azymut"/>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="chipNumber" class="form-label">Numer chipa SI <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="chipNumber"
+                                       th:field="*{chipNumber}"
+                                       th:classappend="${#fields.hasErrors('chipNumber')} ? 'is-invalid'"
+                                       placeholder="np. 123456" inputmode="numeric"/>
+                                <div class="invalid-feedback" th:errors="*{chipNumber}"></div>
+                                <div class="form-text">6–8 cyfr</div>
+                            </div>
+                        </div>
+
+                        <!-- Wybór kategorii -->
+                        <div class="mb-4">
+                            <label class="form-label">Kategoria <span class="text-danger">*</span></label>
+                            <div th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                                <div class="row g-2">
+                                    <div class="col-sm-6 col-md-4" th:each="cat : ${categories}">
+                                        <input type="radio" class="btn-check" name="categoryId"
+                                               th:id="'cat_' + ${cat.id}"
+                                               th:value="${cat.id}"
+                                               th:checked="${registrationForm.categoryId == cat.id}"
+                                               autocomplete="off"/>
+                                        <label class="btn btn-outline-primary w-100 text-start"
+                                               th:for="'cat_' + ${cat.id}">
+                                            <span class="fw-semibold d-block" th:text="${cat.name}">Kat</span>
+                                            <small class="text-muted" th:if="${cat.distanceKm != null}"
+                                                   th:text="${cat.distanceKm + ' km'}"></small>
+                                            <small class="text-muted" th:unless="${cat.distanceKm != null}">brak inf.</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${#fields.hasErrors('categoryId')}" class="text-danger small mt-1"
+                                 th:errors="*{categoryId}"></div>
+                        </div>
+
+                        <div class="d-flex gap-2 pt-2">
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="bi bi-send me-2"></i>Wyślij zgłoszenie
+                            </button>
+                            <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-outline-secondary btn-lg">
+                                Anuluj
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        // Telefon: blokuj litery podczas wpisywania
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', function () {
+            this.value = this.value.replace(/[^\d\s\+\-]/g, '');
+        });
+        phoneInput.addEventListener('keydown', function (e) {
+            if (e.key.length === 1 && /[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        // Walidacja on-blur dla wszystkich wymaganych pól
+        const rules = {
+            firstName:   { required: true, minLength: 2, label: 'Imię musi mieć co najmniej 2 znaki.' },
+            lastName:    { required: true, minLength: 2, label: 'Nazwisko musi mieć co najmniej 2 znaki.' },
+            dateOfBirth: { required: true, label: 'Podaj datę urodzenia.' },
+            email:       { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, label: 'Podaj prawidłowy adres e-mail.' },
+            phone:       { pattern: /^[\d\s\+\-]{0,15}$/, label: 'Numer telefonu może zawierać tylko cyfry, spacje, + i -.' },
+            chipNumber:  { required: true, pattern: /^\d{6,8}$/, label: 'Numer chipa: 6–8 cyfr.' }
+        };
+
+        Object.entries(rules).forEach(([id, rule]) => {
+            const input = document.getElementById(id);
+            if (!input) return;
+            const feedback = input.nextElementSibling?.classList.contains('invalid-feedback')
+                ? input.nextElementSibling
+                : null;
+
+            input.addEventListener('blur', function () {
+                const val = this.value.trim();
+                let error = '';
+                if (rule.required && !val) {
+                    error = rule.label;
+                } else if (val && rule.minLength && val.length < rule.minLength) {
+                    error = rule.label;
+                } else if (val && rule.pattern && !rule.pattern.test(val)) {
+                    error = rule.label;
+                }
+
+                if (error) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                    if (feedback) feedback.textContent = error;
+                } else if (val || !rule.required) {
+                    this.classList.remove('is-invalid');
+                    if (val) this.classList.add('is-valid');
+                }
+            });
+        });
+    })();
+    </script>
+</main>
+</body>
+</html>

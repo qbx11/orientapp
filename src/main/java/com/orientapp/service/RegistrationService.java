@@ -123,12 +123,13 @@ public class RegistrationService {
     /** Rejestracja anonimowa z publicznego formularza — tworzy użytkownika bez konta. */
     @Transactional
     public Registration registerAnonymous(Long eventId, Long categoryId,
-                                          String fullName, String club, String chipNumber) {
+                                          String firstName, String lastName,
+                                          String club, String chipNumber) {
         Event event = eventService.findById(eventId);
         if (event.getStatus() != EventStatus.OPEN) {
             throw new RegistrationClosedException(event.getName());
         }
-        AppUser competitor = userService.createAnonymousCompetitor(fullName, club);
+        AppUser competitor = userService.createAnonymousCompetitor(firstName + " " + lastName, club);
         Category category = categoryService.findById(categoryId);
         Registration reg = Registration.builder()
                 .event(event)

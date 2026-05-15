@@ -42,7 +42,7 @@
                             <div class="col-sm-6">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select" id="status" th:field="*{status}">
-                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">STATUS</option>
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}">STATUS</option>
                                 </select>
                             </div>
                         </div>
@@ -148,9 +148,6 @@
                 </a>
             </div>
 
-            <!-- Karta pogody -->
-            <div class="mt-3" th:if="${event.latitude != null}"
-                 th:replace="~{fragments/weather-card :: weatherCard}"></div>
         </div>
     </div>
 </main>

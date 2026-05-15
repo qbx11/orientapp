@@ -3,8 +3,14 @@ package com.orientapp.controller;
 import com.orientapp.dto.CategoryFormDto;
 import com.orientapp.dto.EventFormDto;
 import com.orientapp.dto.ResultFormDto;
+import com.orientapp.dto.TrackPointFormDto;
+import com.orientapp.dto.TrackPointView;
 import com.orientapp.model.*;
-import com.orientapp.service.*;
+import com.orientapp.service.CategoryService;
+import com.orientapp.service.EventService;
+import com.orientapp.service.RegistrationService;
+import com.orientapp.service.ResultService;
+import com.orientapp.service.TrackPointService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Duration;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -25,7 +32,7 @@ public class AdminController {
     private final CategoryService categoryService;
     private final RegistrationService registrationService;
     private final ResultService resultService;
-    private final WeatherService weatherService;
+    private final TrackPointService trackPointService;
 
     @ModelAttribute("currentUri")
     public String currentUri(HttpServletRequest request) {
@@ -108,8 +115,6 @@ public class AdminController {
         model.addAttribute("categoryForm", new CategoryFormDto());
         model.addAttribute("statuses", EventStatus.values());
         model.addAttribute("editMode", true);
-        model.addAttribute("weather",
-                weatherService.getWeather(event.getLatitude(), event.getLongitude()).orElse(null));
         return "admin/event-form";
     }
 
@@ -212,6 +217,57 @@ public class AdminController {
         model.addAttribute("registrationsByCategory",
                 registrationService.groupByCategory(id));
         return "admin/results";
+    }
+
+    // ── TrackPoints ───────────────────────────────────────────────────────────
+
+    @GetMapping("/registrations/{registrationId}/track")
+    public String trackForm(@PathVariable Long registrationId, Model model) {
+        if (!model.containsAttribute("trackPointForm")) {
+            model.addAttribute("trackPointForm", new TrackPointFormDto());
+        }
+        model.addAttribute("registration", registrationService.findById(registrationId));
+        List<TrackPointView> trackPoints = trackPointService.findByRegistration(registrationId)
+                .stream()
+                .map(tp -> new TrackPointView(
+                        tp.getId(), tp.getLatitude(), tp.getLongitude(),
+                        tp.getTimestamp().toString(), tp.getCheckpointOrder()))
+                .toList();
+        model.addAttribute("trackPoints", trackPoints);
+        model.addAttribute("trackPointsList", trackPointService.findByRegistration(registrationId));
+        return "admin/track-form";
+    }
+
+    @PostMapping("/registrations/{registrationId}/track")
+    public String addTrackPoint(@PathVariable Long registrationId,
+                                @Valid @ModelAttribute("trackPointForm") TrackPointFormDto form,
+                                BindingResult bindingResult,
+                                RedirectAttributes ra) {
+        if (bindingResult.hasErrors()) {
+            ra.addFlashAttribute("org.springframework.validation.BindingResult.trackPointForm", bindingResult);
+            ra.addFlashAttribute("trackPointForm", form);
+            return "redirect:/admin/registrations/" + registrationId + "/track";
+        }
+        trackPointService.addPoint(registrationId, form.getLatitude(), form.getLongitude(),
+                form.getTimestamp(), form.getCheckpointOrder());
+        ra.addFlashAttribute("successMessage", "Punkt trasy dodany.");
+        return "redirect:/admin/registrations/" + registrationId + "/track";
+    }
+
+    @PostMapping("/track-points/{pointId}/delete")
+    public String deleteTrackPoint(@PathVariable Long pointId,
+                                   @RequestParam Long registrationId,
+                                   RedirectAttributes ra) {
+        trackPointService.deletePoint(pointId);
+        ra.addFlashAttribute("successMessage", "Punkt usunięty.");
+        return "redirect:/admin/registrations/" + registrationId + "/track";
+    }
+
+    @PostMapping("/registrations/{registrationId}/track/clear")
+    public String clearTrack(@PathVariable Long registrationId, RedirectAttributes ra) {
+        trackPointService.deleteByRegistration(registrationId);
+        ra.addFlashAttribute("successMessage", "Trasa wyczyszczona.");
+        return "redirect:/admin/registrations/" + registrationId + "/track";
     }
 
     @PostMapping("/results")

@@ -6,7 +6,7 @@
 </head>
 <body>
 <main>
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/}">Zawody</a></li>
             <li class="breadcrumb-item">
@@ -43,6 +43,7 @@
                     <th>Klub</th>
                     <th>Chip</th>
                     <th>Czas</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -68,7 +69,13 @@
                                 <span th:text="${(h > 0 ? h + ':' : '') + #numbers.formatDecimal(m,2,0) + ':' + #numbers.formatDecimal(s,2,0)}">00:00</span>
                             </span>
                         </span>
-                        <span th:unless="${result.dnf}" th:unless="${result.finishTime != null}" class="text-muted">–</span>
+                        <span th:if="${!result.dnf and result.finishTime == null}" class="text-muted">–</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/events/{eid}/results/{rid}(eid=${event.id},rid=${result.registration.id})}"
+                           class="btn btn-outline-secondary btn-sm" title="Trasa">
+                            <i class="bi bi-map"></i>
+                        </a>
                     </td>
                 </tr>
                 </tbody>
