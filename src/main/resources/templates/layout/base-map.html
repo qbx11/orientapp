@@ -14,38 +14,32 @@
           rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
-        html, body { height: 100%; }
-        body { padding-top: 56px; display: flex; flex-direction: column; min-height: 100vh; }
-        body > main { flex: 1 0 auto; }
-        body > footer { flex-shrink: 0; }
-        .event-card { transition: box-shadow .2s, transform .15s; cursor: pointer; }
-        .event-card:hover { box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); transform: translateY(-2px); }
+        body { padding-top: 56px; }
         .status-badge { font-size: .75rem; }
-        footer a { color: #adb5bd; }
-        footer a:hover { color: #fff; }
-        #event-map { height: 280px; border-radius: .375rem; }
-        .breadcrumb-nav { background: #f8f9fa; border-radius: .5rem; padding: .5rem 1rem; margin-bottom: 1.25rem; display: inline-flex; }
-        .breadcrumb { margin: 0; }
-        .breadcrumb-item + .breadcrumb-item::before { color: #adb5bd; }
+        #map { height: 480px; border-radius: .375rem; }
+        footer a { color: #adb5bd; } footer a:hover { color: #fff; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}">
-            <i class="bi bi-compass me-1"></i>OrientApp
-        </a>
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="bi bi-compass me-1"></i>OrientApp</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto"></ul>
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">Zawody</a>
+                </li>
+            </ul>
             <ul class="navbar-nav">
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" th:href="@{/admin}">
-                        <i class="bi bi-gear me-1"></i>Panel admina
-                    </a>
+                    <a class="nav-link" th:href="@{/admin}">Panel admina</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}"><i class="bi bi-gear me-1"></i>Panel admina</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated() and hasRole('ADMIN')">
                     <form th:action="@{/logout}" method="post" class="d-inline">
@@ -67,9 +61,7 @@
     <div class="container">
         <div class="row g-4">
             <div class="col-md-4">
-                <h5 class="text-white fw-bold mb-2">
-                    <i class="bi bi-compass me-1"></i>OrientApp
-                </h5>
+                <h5 class="text-white fw-bold mb-2"><i class="bi bi-compass me-1"></i>OrientApp</h5>
                 <p class="small mb-0">Platforma zarządzania zawodami<br>w biegu na orientację.</p>
             </div>
             <div class="col-md-4">
@@ -82,7 +74,7 @@
                 <ul class="list-unstyled small mb-0">
                     <li><a th:href="@{/}" class="text-decoration-none">Zawody</a></li>
                     <li sec:authorize="isAnonymous()">
-                        <a th:href="@{/login}" class="text-decoration-none">Admin</a>
+                        <a th:href="@{/login}" class="text-decoration-none">Logowanie (admin)</a>
                     </li>
                 </ul>
             </div>

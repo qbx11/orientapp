@@ -1,17 +1,33 @@
 package com.orientapp.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Data
 public class RegistrationFormDto {
 
-    @NotBlank(message = "Imię i nazwisko jest wymagane")
-    @Size(min = 2, max = 100, message = "Imię i nazwisko musi mieć od 2 do 100 znaków")
-    private String fullName;
+    @NotBlank(message = "Imię jest wymagane")
+    @Size(min = 2, max = 50, message = "Imię musi mieć od 2 do 50 znaków")
+    private String firstName;
+
+    @NotBlank(message = "Nazwisko jest wymagane")
+    @Size(min = 2, max = 50, message = "Nazwisko musi mieć od 2 do 50 znaków")
+    private String lastName;
+
+    @NotNull(message = "Data urodzenia jest wymagana")
+    @Past(message = "Data urodzenia musi być w przeszłości")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate dateOfBirth;
+
+    @NotBlank(message = "Adres e-mail jest wymagany")
+    @Email(message = "Podaj prawidłowy adres e-mail")
+    private String email;
+
+    @Pattern(regexp = "^(\\+?[\\d\\s\\-]{7,15})?$", message = "Podaj prawidłowy numer telefonu")
+    private String phone;
 
     private String club;
 

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin-map :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${registration.competitor.fullName + ' – Trasa – Admin'}">Trasa – Admin</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/events}">Zawody</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/events/{id}/registrations(id=${registration.event.id})}"
+                   th:text="${registration.event.name}">Zawody</a>
+            </li>
+            <li class="breadcrumb-item active"
+                th:text="${registration.competitor.fullName + ' – trasa'}">Trasa</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Mapa -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-map me-2"></i>Podgląd trasy
+                    <small class="text-muted fw-normal ms-2">Kliknij mapę, aby wstawić współrzędne do formularza</small>
+                </div>
+                <div class="card-body p-2">
+                    <div id="map"></div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">
+                        <span th:text="${#lists.size(trackPoints)}">0</span> punktów
+                    </span>
+                    <form th:action="@{/admin/registrations/{id}/track/clear(id=${registration.id})}"
+                          method="post"
+                          th:if="${not #lists.isEmpty(trackPoints)}"
+                          onsubmit="return confirm('Usunąć wszystkie punkty trasy?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>Wyczyść trasę
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel boczny -->
+        <div class="col-lg-5">
+            <!-- Info o zawodniku -->
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-person me-2"></i>Zawodnik
+                </div>
+                <div class="card-body small">
+                    <dl class="row mb-0">
+                        <dt class="col-5">Imię i nazwisko</dt>
+                        <dd class="col-7" th:text="${registration.competitor.fullName}">—</dd>
+                        <dt class="col-5">Kategoria</dt>
+                        <dd class="col-7" th:text="${registration.category.name}">—</dd>
+                        <dt class="col-5">Chip SI</dt>
+                        <dd class="col-7" th:text="${registration.chipNumber ?: '—'}">—</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Formularz dodawania punktu -->
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-plus-circle me-2"></i>Dodaj punkt trasy
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/registrations/{id}/track(id=${registration.id})}"
+                          th:object="${trackPointForm}" method="post">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label form-label-sm">Szerokość geo. <span class="text-danger">*</span></label>
+                                <input type="number" step="0.00001" class="form-control form-control-sm"
+                                       id="latInput" th:field="*{latitude}" placeholder="51.1079"
+                                       th:classappend="${#fields.hasErrors('latitude')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{latitude}"></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label form-label-sm">Długość geo. <span class="text-danger">*</span></label>
+                                <input type="number" step="0.00001" class="form-control form-control-sm"
+                                       id="lngInput" th:field="*{longitude}" placeholder="17.0385"
+                                       th:classappend="${#fields.hasErrors('longitude')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{longitude}"></div>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-8">
+                                <label class="form-label form-label-sm">Czas osiągnięcia <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control form-control-sm"
+                                       th:field="*{timestamp}"
+                                       th:classappend="${#fields.hasErrors('timestamp')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{timestamp}"></div>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label form-label-sm">Nr punktu</label>
+                                <input type="number" min="1" class="form-control form-control-sm"
+                                       th:field="*{checkpointOrder}" placeholder="1"/>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-plus-lg me-1"></i>Dodaj punkt
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista istniejących punktów -->
+            <div class="card" th:unless="${#lists.isEmpty(trackPointsList)}">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-list-ol me-2"></i>Punkty na trasie
+                </div>
+                <ul class="list-group list-group-flush" style="max-height:280px;overflow-y:auto">
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-1"
+                        th:each="tp : ${trackPointsList}">
+                        <div class="small">
+                            <span class="badge bg-primary me-1"
+                                  th:text="${tp.checkpointOrder != null ? tp.checkpointOrder : '—'}">1</span>
+                            <span th:text="${tp.timestamp.toString().replace('T',' ')}">—</span>
+                            <br/>
+                            <span class="text-muted"
+                                  th:text="${#numbers.formatDecimal(tp.latitude,1,5) + ', ' + #numbers.formatDecimal(tp.longitude,1,5)}">0, 0</span>
+                        </div>
+                        <form th:action="@{/admin/track-points/{id}/delete(id=${tp.id})}" method="post">
+                            <input type="hidden" name="registrationId" th:value="${registration.id}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Usunąć punkt?')">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const trackPoints = /*[[${trackPoints}]]*/ [];
+        const latInput = document.getElementById('latInput');
+        const lngInput = document.getElementById('lngInput');
+
+        const map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Kliknięcie mapy → wstaw współrzędne do formularza
+        let clickMarker = null;
+        map.on('click', function (e) {
+            const lat = e.latlng.lat.toFixed(5);
+            const lng = e.latlng.lng.toFixed(5);
+            latInput.value = lat;
+            lngInput.value = lng;
+            if (clickMarker) map.removeLayer(clickMarker);
+            clickMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: '',
+                    html: '<div style="background:#fd7e14;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">+</div>',
+                    iconSize: [20, 20], iconAnchor: [10, 10]
+                })
+            }).addTo(map).bindPopup(`Nowy punkt<br>${lat}, ${lng}`).openPopup();
+        });
+
+        if (trackPoints.length > 0) {
+            const latLngs = trackPoints.map(p => [p.lat, p.lng]);
+            L.polyline(latLngs, { color: '#0d6efd', weight: 4, opacity: 0.8 }).addTo(map);
+
+            trackPoints.forEach((tp, i) => {
+                const label = tp.checkpointOrder != null ? tp.checkpointOrder : (i + 1);
+                const isStart = i === 0;
+                const isFinish = i === trackPoints.length - 1;
+                const bg = isStart ? '#198754' : (isFinish ? '#dc3545' : '#0d6efd');
+                const lbl = isStart ? 'S' : (isFinish ? 'M' : label);
+                const sz = isStart || isFinish ? 28 : 24;
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div style="background:${bg};color:#fff;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${lbl}</div>`,
+                    iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2]
+                });
+                const ts = tp.timestamp.replace('T', ' ');
+                L.marker([tp.lat, tp.lng], { icon }).addTo(map)
+                    .bindPopup(`<strong>Punkt ${label}</strong><br>${ts}`);
+            });
+            map.fitBounds(latLngs, { padding: [30, 30] });
+        } else {
+            map.setView([52.0, 19.0], 6);
+        }
+        /*]]>*/
+    </script>
+</main>
+</body>
+</html>

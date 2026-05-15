@@ -61,7 +61,7 @@
                     <td th:text="${reg.competitor.fullName}">Zawodnik</td>
                     <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
                     <td>
-                        <span th:text="${reg.status}"
+                        <span th:text="${reg.status.label}"
                               th:classappend="${reg.status.name() == 'APPROVED'} ? 'bg-success' : (${reg.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
                               class="badge small">STATUS</span>
                     </td>

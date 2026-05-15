@@ -26,11 +26,17 @@ public class EventService {
      */
     public List<Event> findUpcoming() {
         LocalDate today = LocalDate.now();
-        return eventRepository.findAll().stream()
-                .filter(e -> e.getStatus() != EventStatus.CLOSED)
+        // Przyszłe (OPEN/DRAFT) rosnąco, potem zakończone malejąco
+        List<Event> upcoming = eventRepository.findAll().stream()
                 .filter(e -> !e.getDate().isBefore(today))
                 .sorted(Comparator.comparing(Event::getDate))
                 .collect(Collectors.toList());
+        List<Event> past = eventRepository.findAll().stream()
+                .filter(e -> e.getDate().isBefore(today) || e.getStatus() == EventStatus.CLOSED)
+                .sorted(Comparator.comparing(Event::getDate).reversed())
+                .collect(Collectors.toList());
+        upcoming.addAll(past);
+        return upcoming.stream().distinct().collect(Collectors.toList());
     }
 
     public List<Event> findAll() {

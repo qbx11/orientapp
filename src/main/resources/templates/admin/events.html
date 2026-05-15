@@ -35,7 +35,7 @@
                     <td th:text="${#temporals.format(event.date, 'dd.MM.yyyy')}">Data</td>
                     <td th:text="${event.location}">Lokalizacja</td>
                     <td>
-                        <span th:text="${event.status}"
+                        <span th:text="${event.status.label}"
                               th:classappend="${event.status.name() == 'OPEN'} ? 'bg-success' : (${event.status.name() == 'DRAFT'} ? 'bg-warning text-dark' : 'bg-secondary')"
                               class="badge">STATUS</span>
                     </td>
