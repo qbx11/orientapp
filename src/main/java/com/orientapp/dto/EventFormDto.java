@@ -32,6 +32,9 @@ public class EventFormDto {
     @Size(max = 2000, message = "Opis może mieć maksymalnie 2000 znaków")
     private String description;
 
+    @Size(max = 20000, message = "Regulamin może mieć maksymalnie 20000 znaków")
+    private String regulations;
+
     @NotNull
     private EventStatus status = EventStatus.DRAFT;
 }

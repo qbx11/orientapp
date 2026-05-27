@@ -64,6 +64,7 @@ public class EventService {
         event.setLatitude(updated.getLatitude());
         event.setLongitude(updated.getLongitude());
         event.setDescription(updated.getDescription());
+        event.setRegulations(updated.getRegulations());
         event.setStatus(updated.getStatus());
         return eventRepository.save(event);
     }

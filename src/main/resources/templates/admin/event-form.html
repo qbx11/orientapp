@@ -68,10 +68,17 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="description" class="form-label">Opis</label>
                             <textarea class="form-control" id="description" th:field="*{description}"
                                       rows="4" placeholder="Opis zawodów..."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="regulations" class="form-label">Regulamin zawodów</label>
+                            <textarea class="form-control" id="regulations" th:field="*{regulations}"
+                                      rows="8" placeholder="Treść regulaminu widoczna dla uczestników..."></textarea>
+                            <div class="form-text">Wyświetlany po kliknięciu „Regulamin zawodów” na stronie publicznej.</div>
                         </div>
 
                         <div class="d-flex gap-2">

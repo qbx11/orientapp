@@ -50,6 +50,23 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(51.1079)
                 .longitude(17.0385)
                 .description("Studencki Nocny Bieg na Orientację. Zawody dla studentów wrocławskich uczelni.")
+                .regulations("""
+                        §1. Postanowienia ogólne
+                        1. Zawody SNOB 2026 organizowane są zgodnie z przepisami PZLO.
+                        2. Uczestnikiem może być student uczelni wyższej z Wrocławia.
+
+                        §2. Kategorie
+                        1. TP12 – trasa ok. 4,2 km.
+                        2. TP20 – trasa ok. 7,5 km.
+
+                        §3. Zgłoszenia
+                        1. Zgłoszenie wymaga akceptacji organizatora.
+                        2. Numer chipu musi być unikalny w ramach zawodów.
+
+                        §4. Bezpieczeństwo
+                        1. Uczestnik zobowiązany jest do posiadania gwizdka i kompasu.
+                        2. Organizator może zdyskwalifikować zawodnika za naruszenie regulaminu.
+                        """)
                 .status(EventStatus.OPEN)
                 .build());
 
@@ -64,6 +81,15 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(50.9044)
                 .longitude(15.7197)
                 .description("Pierwsza runda Ligi Wiosennej. Trasy przez Karkonosze.")
+                .regulations("""
+                        §1. Liga Wiosenna – Runda 1
+                        1. Zawody rozegrane w terenie górskim – obowiązuje kategoria wiekowa OPEN.
+                        2. Kategorie TR15 i TR30 zgodnie z opisem tras na stronie zawodów.
+
+                        §2. Wyniki
+                        1. Klasyfikacja według czasu na trasie.
+                        2. DNF oznacza nieukończenie trasy w limicie czasu.
+                        """)
                 .status(EventStatus.CLOSED)
                 .build());
 

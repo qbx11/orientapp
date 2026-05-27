@@ -90,6 +90,7 @@ public class AdminController {
                 .latitude(form.getLatitude())
                 .longitude(form.getLongitude())
                 .description(form.getDescription())
+                .regulations(form.getRegulations())
                 .status(form.getStatus())
                 .build();
         Event saved = eventService.save(event);
@@ -107,6 +108,7 @@ public class AdminController {
         form.setLatitude(event.getLatitude());
         form.setLongitude(event.getLongitude());
         form.setDescription(event.getDescription());
+        form.setRegulations(event.getRegulations());
         form.setStatus(event.getStatus());
 
         model.addAttribute("eventForm", form);
@@ -139,6 +141,7 @@ public class AdminController {
                 .latitude(form.getLatitude())
                 .longitude(form.getLongitude())
                 .description(form.getDescription())
+                .regulations(form.getRegulations())
                 .status(form.getStatus())
                 .build();
         eventService.update(id, updated);
