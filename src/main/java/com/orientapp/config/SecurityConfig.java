@@ -24,7 +24,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/", "/events/**", "/login", "/css/**", "/js/**", "/images/**", "/results/**").permitAll()
+                .requestMatchers("/", "/events/**", "/login", "/css/**", "/js/**", "/images/**", "/results/**", "/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
