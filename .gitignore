@@ -5,3 +5,6 @@ target/
 .idea/
 *.iml
 .DS_Store
+
+# Lokalna baza H2 (file-based)
+data/
