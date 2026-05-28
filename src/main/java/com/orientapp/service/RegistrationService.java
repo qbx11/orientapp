@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Serwis obsługi zgłoszeń zawodników na zawody ({@link Registration}).
+ * <p>
+ * Odpowiada za rejestrację (w tym anonimową), zatwierdzanie i odrzucanie zgłoszeń
+ * oraz za zestawienia wykorzystujące Java Collections API (filtrowanie po statusie,
+ * grupowanie i zliczanie per kategoria).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,9 +31,19 @@ public class RegistrationService {
     private final AppUserService userService;
 
     /**
-     * Rejestruje zawodnika na zawody. Sprawdza:
-     * - event musi mieć status OPEN
-     * - zawodnik nie może być już zapisany na te zawody
+     * Rejestruje zawodnika (z istniejącym kontem) na zawody.
+     * <p>
+     * Warunki: event musi mieć status {@link EventStatus#OPEN}, a zawodnik nie może
+     * być już zapisany na te zawody.
+     *
+     * @param eventId      identyfikator zawodów
+     * @param categoryId   identyfikator kategorii
+     * @param competitorId identyfikator zawodnika
+     * @param chipNumber   numer chipa SI
+     * @return zapisane zgłoszenie ze statusem {@link RegistrationStatus#PENDING}
+     * @throws RegistrationClosedException   gdy zawody nie są w statusie OPEN
+     * @throws DuplicateRegistrationException gdy zawodnik jest już zapisany na te zawody
+     * @throws EntityNotFoundException       gdy event, kategoria lub zawodnik nie istnieją
      */
     @Transactional
     public Registration register(Long eventId, Long categoryId, Long competitorId, String chipNumber) {
@@ -52,15 +69,34 @@ public class RegistrationService {
         return registrationRepository.save(registration);
     }
 
+    /**
+     * Wyszukuje zgłoszenie po identyfikatorze.
+     *
+     * @param id identyfikator zgłoszenia
+     * @return znalezione zgłoszenie
+     * @throws EntityNotFoundException gdy zgłoszenie o podanym id nie istnieje
+     */
     public Registration findById(Long id) {
         return registrationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Nie znaleziono zgłoszenia o id: " + id));
     }
 
+    /**
+     * Zwraca wszystkie zgłoszenia dla danych zawodów.
+     *
+     * @param eventId identyfikator zawodów
+     * @return lista zgłoszeń (może być pusta)
+     */
     public List<Registration> findByEvent(Long eventId) {
         return registrationRepository.findByEventId(eventId);
     }
 
+    /**
+     * Zlicza wszystkie oczekujące zgłoszenia ({@link RegistrationStatus#PENDING})
+     * w całej aplikacji — filtrowanie strumieniem w Javie.
+     *
+     * @return liczba oczekujących zgłoszeń
+     */
     public long countPendingAll() {
         return registrationRepository.findAll().stream()
                 .filter(r -> r.getStatus() == RegistrationStatus.PENDING)
@@ -68,7 +104,11 @@ public class RegistrationService {
     }
 
     /**
-     * Filtruje zgłoszenia po statusie PENDING — stream().filter() w Javie.
+     * Zwraca oczekujące zgłoszenia danego eventu — filtrowanie po statusie
+     * {@link RegistrationStatus#PENDING} przez {@code stream().filter()} w Javie.
+     *
+     * @param eventId identyfikator zawodów
+     * @return lista oczekujących zgłoszeń (może być pusta)
      */
     public List<Registration> findPendingByEvent(Long eventId) {
         return registrationRepository.findByEventId(eventId).stream()
@@ -77,7 +117,10 @@ public class RegistrationService {
     }
 
     /**
-     * Grupuje zgłoszenia danego eventu per kategoria — Collectors.groupingBy w Javie.
+     * Grupuje zgłoszenia danego eventu per kategoria — {@code Collectors.groupingBy} w Javie.
+     *
+     * @param eventId identyfikator zawodów
+     * @return mapa: kategoria → lista jej zgłoszeń
      */
     public Map<Category, List<Registration>> groupByCategory(Long eventId) {
         return registrationRepository.findByEventId(eventId).stream()
@@ -85,7 +128,10 @@ public class RegistrationService {
     }
 
     /**
-     * Zwraca liczbę zgłoszeń per kategoria dla danego eventu.
+     * Zlicza zgłoszenia per kategoria dla danego eventu.
+     *
+     * @param eventId identyfikator zawodów
+     * @return mapa: nazwa kategorii → liczba zgłoszeń
      */
     public Map<String, Long> countByCategory(Long eventId) {
         return registrationRepository.findByEventId(eventId).stream()
@@ -96,7 +142,9 @@ public class RegistrationService {
     }
 
     /**
-     * Zwraca liczbę zgłoszeń per kategoria dla wszystkich eventów (do wykresu dashboardu).
+     * Zlicza zgłoszenia per kategoria dla wszystkich eventów (dane do wykresu dashboardu).
+     *
+     * @return mapa: nazwa kategorii → łączna liczba zgłoszeń
      */
     public Map<String, Long> countByCategoryAllEvents() {
         return registrationRepository.findAll().stream()
@@ -106,6 +154,13 @@ public class RegistrationService {
                 ));
     }
 
+    /**
+     * Zatwierdza zgłoszenie (status → {@link RegistrationStatus#APPROVED}).
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @return zaktualizowane zgłoszenie
+     * @throws EntityNotFoundException gdy zgłoszenie o podanym id nie istnieje
+     */
     @Transactional
     public Registration approve(Long registrationId) {
         Registration reg = findById(registrationId);
@@ -113,6 +168,13 @@ public class RegistrationService {
         return registrationRepository.save(reg);
     }
 
+    /**
+     * Odrzuca zgłoszenie (status → {@link RegistrationStatus#REJECTED}).
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @return zaktualizowane zgłoszenie
+     * @throws EntityNotFoundException gdy zgłoszenie o podanym id nie istnieje
+     */
     @Transactional
     public Registration reject(Long registrationId) {
         Registration reg = findById(registrationId);
@@ -120,7 +182,20 @@ public class RegistrationService {
         return registrationRepository.save(reg);
     }
 
-    /** Rejestracja anonimowa z publicznego formularza — tworzy użytkownika bez konta. */
+    /**
+     * Rejestruje zawodnika z publicznego formularza, zakładając dla niego
+     * anonimowe konto (bez możliwości logowania).
+     *
+     * @param eventId    identyfikator zawodów
+     * @param categoryId identyfikator kategorii
+     * @param firstName  imię zawodnika
+     * @param lastName   nazwisko zawodnika
+     * @param club       klub sportowy (może być {@code null})
+     * @param chipNumber numer chipa SI
+     * @return zapisane zgłoszenie ze statusem {@link RegistrationStatus#PENDING}
+     * @throws RegistrationClosedException gdy zawody nie są w statusie OPEN
+     * @throws EntityNotFoundException     gdy event lub kategoria nie istnieją
+     */
     @Transactional
     public Registration registerAnonymous(Long eventId, Long categoryId,
                                           String firstName, String lastName,

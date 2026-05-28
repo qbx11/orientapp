@@ -16,6 +16,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * Serwis zarządzania wynikami zawodów ({@link Result}).
+ * <p>
+ * Odpowiada za zapis wyników poszczególnych zgłoszeń, sortowanie ich po czasie
+ * ukończenia (zawodnicy DNF zawsze na końcu) oraz przeliczanie miejsc w kategorii.
+ * Sortowanie i grupowanie wykonywane są w Javie ({@link Comparator},
+ * {@link Collectors#groupingBy}).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,9 +34,11 @@ public class ResultService {
     private final CategoryService categoryService;
 
     /**
-     * Zwraca wyniki dla kategorii posortowane rosnąco po czasie ukończenia.
-     * Zawodnicy DNF trafiają na koniec listy.
-     * Sortowanie w Javie przez Comparator.
+     * Zwraca wyniki danej kategorii posortowane rosnąco po czasie ukończenia.
+     * Zawodnicy DNF trafiają na koniec listy. Sortowanie w Javie ({@link Comparator}).
+     *
+     * @param categoryId identyfikator kategorii
+     * @return posortowana lista wyników (może być pusta)
      */
     public List<Result> findByCategorySorted(Long categoryId) {
         return resultRepository.findByRegistrationCategoryId(categoryId).stream()
@@ -41,8 +51,11 @@ public class ResultService {
     }
 
     /**
-     * Grupuje wyniki eventu per kategoria — Collectors.groupingBy w Javie.
-     * Każda lista jest posortowana po czasie (DNF na końcu).
+     * Grupuje wyniki eventu per kategoria — {@link Collectors#groupingBy} w Javie.
+     * Każda lista jest posortowana po czasie ukończenia (DNF na końcu).
+     *
+     * @param eventId identyfikator zawodów
+     * @return mapa: kategoria → posortowana lista wyników
      */
     public Map<Category, List<Result>> findByEventGroupedByCategory(Long eventId) {
         return resultRepository.findByRegistrationEventId(eventId).stream()
@@ -55,7 +68,14 @@ public class ResultService {
     }
 
     /**
-     * Zapisuje wynik dla zgłoszenia i przelicza miejsca w kategorii.
+     * Zapisuje (lub aktualizuje) wynik dla zgłoszenia i przelicza miejsca w jego kategorii.
+     * Dla zawodnika DNF czas ukończenia jest zerowany.
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @param finishTime      czas ukończenia (ignorowany gdy {@code dnf == true})
+     * @param dnf             {@code true} jeśli zawodnik nie ukończył (Did Not Finish)
+     * @return zapisany wynik
+     * @throws EntityNotFoundException gdy zgłoszenie o podanym id nie istnieje
      */
     @Transactional
     public Result saveResult(Long registrationId, Duration finishTime, boolean dnf) {
@@ -73,8 +93,10 @@ public class ResultService {
     }
 
     /**
-     * Przelicza miejsca dla całej kategorii.
-     * Miejsca przyznawane przez Comparator, DNF nie dostają numeru miejsca.
+     * Przelicza miejsca dla całej kategorii na podstawie kolejności po czasie.
+     * Zawodnicy DNF nie otrzymują numeru miejsca ({@code place == null}).
+     *
+     * @param categoryId identyfikator kategorii
      */
     @Transactional
     public void recalculatePlaces(Long categoryId) {
@@ -87,6 +109,13 @@ public class ResultService {
         });
     }
 
+    /**
+     * Wyszukuje wynik po identyfikatorze.
+     *
+     * @param id identyfikator wyniku
+     * @return znaleziony wynik
+     * @throws EntityNotFoundException gdy wynik o podanym id nie istnieje
+     */
     public Result findById(Long id) {
         return resultRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Nie znaleziono wyniku o id: " + id));
