@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientapp.dto.GeocodingResultDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -35,6 +36,7 @@ public class GeocodingService {
      *
      * @param objectMapper mapper JSON używany do parsowania odpowiedzi
      */
+    @Autowired
     public GeocodingService(ObjectMapper objectMapper) {
         this(objectMapper, HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))

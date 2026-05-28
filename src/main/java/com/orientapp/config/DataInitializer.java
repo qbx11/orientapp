@@ -5,6 +5,7 @@ import com.orientapp.repository.*;
 import com.orientapp.service.AppUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,14 @@ public class DataInitializer implements CommandLineRunner {
     private final ResultRepository resultRepository;
     private final TrackPointRepository trackPointRepository;
     private final PasswordEncoder passwordEncoder;
+
+    /** Login domyślnego administratora; nadpisywalny zmienną środowiskową APP_ADMIN_USERNAME. */
+    @Value("${app.admin.username:admin@123}")
+    private String adminUsername;
+
+    /** Hasło domyślnego administratora; nadpisywalne zmienną środowiskową APP_ADMIN_PASSWORD. */
+    @Value("${app.admin.password:admin123}")
+    private String adminPassword;
 
     // Pętla leśna wokół centrum startowego w Jeleniej Górze (10 punktów kontrolnych)
     private static final double[] BASE_LAT = {
@@ -55,7 +64,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Seeding demo data...");
 
         // ── Admin ─────────────────────────────────────────────────────────────
-        userService.createUser("admin@123", "admin123", "Administrator", null, Role.ADMIN);
+        userService.createUser(adminUsername, adminPassword, "Administrator", null, Role.ADMIN);
 
         // ── Zawody 1 – SNOB 2026 (OPEN, za 2 tygodnie) ───────────────────────
         Event snob = eventRepository.save(Event.builder()
