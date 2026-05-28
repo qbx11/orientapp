@@ -80,6 +80,12 @@ public class PublicController {
         return "redirect:/events/" + id;
     }
 
+    @GetMapping("/events/{id}/regulations")
+    public String regulations(@PathVariable Long id, Model model) {
+        model.addAttribute("event", eventService.findById(id));
+        return "public/regulations";
+    }
+
     @GetMapping("/events/{id}/results")
     public String results(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));

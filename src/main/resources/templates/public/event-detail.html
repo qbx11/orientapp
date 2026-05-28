@@ -71,7 +71,8 @@
                        class="btn btn-success btn-lg">
                         <i class="bi bi-pencil-square me-2"></i>Zarejestruj się
                     </a>
-                    <a href="#" class="btn btn-outline-secondary btn-lg">
+                    <a th:href="@{/events/{id}/regulations(id=${event.id})}"
+                       class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-file-text me-2"></i>Regulamin zawodów
                     </a>
                 </th:block>
@@ -81,7 +82,8 @@
                     <div class="alert alert-warning mb-2">
                         <i class="bi bi-clock me-2"></i>Zapisy zostaną otwarte wkrótce.
                     </div>
-                    <a href="#" class="btn btn-outline-secondary btn-lg">
+                    <a th:href="@{/events/{id}/regulations(id=${event.id})}"
+                       class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-file-text me-2"></i>Regulamin zawodów
                     </a>
                 </th:block>

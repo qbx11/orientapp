@@ -38,6 +38,9 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
+    private String regulations;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
