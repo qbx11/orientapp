@@ -41,56 +41,163 @@
             <table class="table table-hover table-sm align-middle mb-0">
                 <thead class="table-light">
                 <tr>
-                    <th>Zawodnik</th>
+                    <th>Imię i Nazwisko</th>
                     <th>Klub</th>
                     <th>Chip</th>
-                    <th>Data zgłoszenia</th>
                     <th>Status</th>
-                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="reg : ${entry.value}">
-                    <td class="fw-semibold" th:text="${reg.competitor.fullName}">Zawodnik</td>
+                    <td class="fw-semibold">
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 fw-semibold text-decoration-none align-baseline js-competitor-modal-trigger"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target=|#competitorModal${reg.id}|"
+                                th:text="${reg.competitor.fullName}">
+                            Zawodnik
+                        </button>
+                    </td>
                     <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
                     <td class="text-muted small" th:text="${reg.chipNumber ?: '—'}">Chip</td>
-                    <td class="text-muted small"
-                        th:text="${#temporals.format(reg.registeredAt, 'dd.MM.yyyy HH:mm')}">Data</td>
                     <td>
                         <span th:text="${reg.status.label}"
                               th:classappend="${reg.status.name() == 'APPROVED'} ? 'bg-success' : (${reg.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
                               class="badge">STATUS</span>
                     </td>
-                    <td>
-                        <div class="d-flex gap-1 justify-content-end"
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:each="reg : ${entry.value}"
+             class="modal fade"
+             th:id="'competitorModal' + ${reg.id}"
+             tabindex="-1"
+             th:attr="aria-labelledby=|competitorModalLabel${reg.id}|"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"
+                            th:id="'competitorModalLabel' + ${reg.id}"
+                            th:text="${reg.competitor.fullName}">
+                            Zawodnik
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Zamknij"></button>
+                    </div>
+                    <div class="modal-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Imię i nazwisko</dt>
+                            <dd class="col-sm-8" th:text="${reg.competitor.fullName}">Zawodnik</dd>
+
+                            <dt class="col-sm-4">Data urodzenia</dt>
+                            <dd class="col-sm-8"
+                                th:text="${reg.competitor.dateOfBirth != null ? #temporals.format(reg.competitor.dateOfBirth, 'dd.MM.yyyy') : '—'}">
+                                —
+                            </dd>
+
+                            <dt class="col-sm-4">E-mail</dt>
+                            <dd class="col-sm-8" th:text="${reg.competitor.email ?: '—'}">—</dd>
+
+                            <dt class="col-sm-4">Telefon</dt>
+                            <dd class="col-sm-8" th:text="${reg.competitor.phone ?: '—'}">—</dd>
+
+                            <dt class="col-sm-4">Klub</dt>
+                            <dd class="col-sm-8" th:text="${reg.competitor.club ?: '—'}">—</dd>
+
+                            <dt class="col-sm-4">Chip</dt>
+                            <dd class="col-sm-8" th:text="${reg.chipNumber ?: '—'}">—</dd>
+
+                            <dt class="col-sm-4">Kategoria</dt>
+                            <dd class="col-sm-8" th:text="${reg.category.name}">Kategoria</dd>
+
+                        </dl>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="me-auto d-flex flex-wrap gap-2"
                              th:if="${reg.status.name() == 'PENDING'}">
                             <form th:action="@{/admin/registrations/{id}/approve(id=${reg.id})}"
                                   method="post">
                                 <input type="hidden" name="eventId" th:value="${event.id}"/>
-                                <button type="submit" class="btn btn-sm btn-success">
+                                <button type="submit" class="btn btn-success">
                                     <i class="bi bi-check-lg me-1"></i>Zatwierdź
                                 </button>
                             </form>
                             <form th:action="@{/admin/registrations/{id}/reject(id=${reg.id})}"
                                   method="post">
                                 <input type="hidden" name="eventId" th:value="${event.id}"/>
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <button type="submit" class="btn btn-outline-danger">
                                     <i class="bi bi-x-lg me-1"></i>Odrzuć
                                 </button>
                             </form>
                         </div>
-                        <a th:href="@{/admin/registrations/{id}/track(id=${reg.id})}"
-                           class="btn btn-sm btn-outline-secondary ms-1" title="Trasa">
-                            <i class="bi bi-map"></i>
-                        </a>
-                        <span th:unless="${reg.status.name() == 'PENDING'}"
-                              class="text-muted small"></span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Zamknij</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function closeFallbackModal(modalEl) {
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                modalEl.setAttribute('aria-hidden', 'true');
+                modalEl.removeAttribute('aria-modal');
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.querySelectorAll('.js-modal-backdrop').forEach(function (backdrop) {
+                    backdrop.remove();
+                });
+            }
+
+            function showFallbackModal(modalEl) {
+                modalEl.classList.add('show');
+                modalEl.style.display = 'block';
+                modalEl.removeAttribute('aria-hidden');
+                modalEl.setAttribute('aria-modal', 'true');
+                document.body.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+
+                if (!document.querySelector('.js-modal-backdrop')) {
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show js-modal-backdrop';
+                    document.body.appendChild(backdrop);
+                }
+
+                modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (closeButton) {
+                    closeButton.addEventListener('click', function () {
+                        closeFallbackModal(modalEl);
+                    }, { once: true });
+                });
+
+                modalEl.addEventListener('click', function (event) {
+                    if (event.target === modalEl) {
+                        closeFallbackModal(modalEl);
+                    }
+                }, { once: true });
+            }
+
+            document.querySelectorAll('.js-competitor-modal-trigger').forEach(function (trigger) {
+                trigger.addEventListener('click', function (event) {
+                    const selector = trigger.getAttribute('data-bs-target');
+                    const modalEl = selector ? document.querySelector(selector) : null;
+                    if (!modalEl) return;
+
+                    if (window.bootstrap) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    } else {
+                        event.preventDefault();
+                        showFallbackModal(modalEl);
+                    }
+                });
+            });
+        });
+    </script>
 </main>
 </body>
 </html>

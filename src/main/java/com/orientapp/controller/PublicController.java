@@ -71,6 +71,7 @@ public class PublicController {
             registrationService.registerAnonymous(
                     id, form.getCategoryId(),
                     form.getFirstName(), form.getLastName(),
+                    form.getEmail(), form.getPhone(), form.getDateOfBirth(),
                     form.getClub(), form.getChipNumber());
             redirectAttributes.addFlashAttribute("successMessage",
                     "Zgłoszenie przyjęte! Oczekuje na zatwierdzenie przez organizatora.");

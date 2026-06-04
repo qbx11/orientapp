@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -190,6 +191,9 @@ public class RegistrationService {
      * @param categoryId identyfikator kategorii
      * @param firstName  imię zawodnika
      * @param lastName   nazwisko zawodnika
+     * @param email      adres e-mail zawodnika
+     * @param phone      numer telefonu zawodnika (może być {@code null})
+     * @param dateOfBirth data urodzenia zawodnika
      * @param club       klub sportowy (może być {@code null})
      * @param chipNumber numer chipa SI
      * @return zapisane zgłoszenie ze statusem {@link RegistrationStatus#PENDING}
@@ -199,12 +203,14 @@ public class RegistrationService {
     @Transactional
     public Registration registerAnonymous(Long eventId, Long categoryId,
                                           String firstName, String lastName,
+                                          String email, String phone, LocalDate dateOfBirth,
                                           String club, String chipNumber) {
         Event event = eventService.findById(eventId);
         if (event.getStatus() != EventStatus.OPEN) {
             throw new RegistrationClosedException(event.getName());
         }
-        AppUser competitor = userService.createAnonymousCompetitor(firstName + " " + lastName, club);
+        AppUser competitor = userService.createAnonymousCompetitor(
+                firstName + " " + lastName, email, phone, dateOfBirth, club);
         Category category = categoryService.findById(categoryId);
         Registration reg = Registration.builder()
                 .event(event)

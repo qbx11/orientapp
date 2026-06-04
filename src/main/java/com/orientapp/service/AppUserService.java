@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,6 +86,7 @@ public class AppUserService implements UserDetailsService {
                 .username(username)
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .fullName(fullName)
+                .email(username)
                 .club(club)
                 .role(role)
                 .build();
@@ -97,17 +99,24 @@ public class AppUserService implements UserDetailsService {
      * Login generowany jest losowo (UUID), hasło pozostaje puste — takie konto
      * służy wyłącznie do powiązania zgłoszenia z osobą i nie pozwala na logowanie.
      *
-     * @param fullName imię i nazwisko zawodnika
-     * @param club     klub sportowy (może być {@code null})
+     * @param fullName    imię i nazwisko zawodnika
+     * @param email       adres e-mail zawodnika
+     * @param phone       numer telefonu zawodnika (może być {@code null})
+     * @param dateOfBirth data urodzenia zawodnika
+     * @param club        klub sportowy (może być {@code null})
      * @return zapisany użytkownik o roli {@link Role#COMPETITOR}
      */
     @Transactional
-    public AppUser createAnonymousCompetitor(String fullName, String club) {
+    public AppUser createAnonymousCompetitor(String fullName, String email, String phone,
+                                             LocalDate dateOfBirth, String club) {
         String username = UUID.randomUUID() + "@anon.orientapp.pl";
         return userRepository.save(AppUser.builder()
                 .username(username)
                 .passwordHash("")
                 .fullName(fullName)
+                .email(email)
+                .phone(phone)
+                .dateOfBirth(dateOfBirth)
                 .club(club)
                 .role(Role.COMPETITOR)
                 .build());
