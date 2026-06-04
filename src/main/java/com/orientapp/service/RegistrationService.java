@@ -170,6 +170,36 @@ public class RegistrationService {
     }
 
     /**
+     * Aktualizuje dane zawodnika powiązanego ze zgłoszeniem oraz numer chipa.
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @param firstName      imię zawodnika
+     * @param lastName       nazwisko zawodnika
+     * @param email          adres e-mail
+     * @param phone          numer telefonu
+     * @param dateOfBirth    data urodzenia
+     * @param club           klub sportowy
+     * @param chipNumber     numer chipa SI
+     * @return zaktualizowane zgłoszenie
+     */
+    @Transactional
+    public Registration updateCompetitor(Long registrationId, String firstName, String lastName,
+                                         String email, String phone, LocalDate dateOfBirth,
+                                         String club, String chipNumber) {
+        Registration reg = findById(registrationId);
+        AppUser competitor = reg.getCompetitor();
+        String fullName = ((firstName == null ? "" : firstName.trim()) + " "
+                + (lastName == null ? "" : lastName.trim())).trim();
+        competitor.setFullName(fullName);
+        competitor.setEmail(email == null || email.isBlank() ? null : email.trim());
+        competitor.setPhone(phone == null || phone.isBlank() ? null : phone.trim());
+        competitor.setDateOfBirth(dateOfBirth);
+        competitor.setClub(club == null || club.isBlank() ? null : club.trim());
+        reg.setChipNumber(chipNumber == null || chipNumber.isBlank() ? null : chipNumber.trim());
+        return registrationRepository.save(reg);
+    }
+
+    /**
      * Odrzuca zgłoszenie (status → {@link RegistrationStatus#REJECTED}).
      *
      * @param registrationId identyfikator zgłoszenia

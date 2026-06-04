@@ -75,66 +75,118 @@
              th:id="'competitorModal' + ${reg.id}"
              tabindex="-1"
              th:attr="aria-labelledby=|competitorModalLabel${reg.id}|"
-             aria-hidden="true">
+             aria-hidden="true"
+             th:with="firstName=${#strings.contains(reg.competitor.fullName, ' ') ? #strings.substringBefore(reg.competitor.fullName, ' ') : reg.competitor.fullName},
+                      lastName=${#strings.contains(reg.competitor.fullName, ' ') ? #strings.substringAfter(reg.competitor.fullName, ' ') : ''}">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"
-                            th:id="'competitorModalLabel' + ${reg.id}"
-                            th:text="${reg.competitor.fullName}">
-                            Zawodnik
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
                                 aria-label="Zamknij"></button>
                     </div>
-                    <div class="modal-body">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-4">Imię i nazwisko</dt>
-                            <dd class="col-sm-8" th:text="${reg.competitor.fullName}">Zawodnik</dd>
+                    <form th:action="@{/admin/registrations/{id}/competitor(id=${reg.id})}" method="post"
+                          class="js-competitor-form">
+                        <input type="hidden" name="returnUrl"
+                               th:value="@{/admin/events/{id}/registrations(id=${event.id})}"/>
+                        <div class="modal-body pt-0">
+                            <dl class="row mb-0 js-view-mode">
+                                <dt class="col-sm-4">Imię</dt>
+                                <dd class="col-sm-8" th:text="${firstName}">Imię</dd>
 
-                            <dt class="col-sm-4">Data urodzenia</dt>
-                            <dd class="col-sm-8"
-                                th:text="${reg.competitor.dateOfBirth != null ? #temporals.format(reg.competitor.dateOfBirth, 'dd.MM.yyyy') : '—'}">
-                                —
-                            </dd>
+                                <dt class="col-sm-4">Nazwisko</dt>
+                                <dd class="col-sm-8" th:text="${lastName ?: '—'}">Nazwisko</dd>
 
-                            <dt class="col-sm-4">E-mail</dt>
-                            <dd class="col-sm-8" th:text="${reg.competitor.email ?: '—'}">—</dd>
+                                <dt class="col-sm-4">Data urodzenia</dt>
+                                <dd class="col-sm-8"
+                                    th:text="${reg.competitor.dateOfBirth != null ? #temporals.format(reg.competitor.dateOfBirth, 'dd.MM.yyyy') : '—'}">
+                                    —
+                                </dd>
 
-                            <dt class="col-sm-4">Telefon</dt>
-                            <dd class="col-sm-8" th:text="${reg.competitor.phone ?: '—'}">—</dd>
+                                <dt class="col-sm-4">E-mail</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.email ?: '—'}">—</dd>
 
-                            <dt class="col-sm-4">Klub</dt>
-                            <dd class="col-sm-8" th:text="${reg.competitor.club ?: '—'}">—</dd>
+                                <dt class="col-sm-4">Telefon</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.phone ?: '—'}">—</dd>
 
-                            <dt class="col-sm-4">Chip</dt>
-                            <dd class="col-sm-8" th:text="${reg.chipNumber ?: '—'}">—</dd>
+                                <dt class="col-sm-4">Klub</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.club ?: '—'}">—</dd>
 
-                            <dt class="col-sm-4">Kategoria</dt>
-                            <dd class="col-sm-8" th:text="${reg.category.name}">Kategoria</dd>
+                                <dt class="col-sm-4">Chip</dt>
+                                <dd class="col-sm-8" th:text="${reg.chipNumber ?: '—'}">—</dd>
 
-                        </dl>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="me-auto d-flex flex-wrap gap-2"
-                             th:if="${reg.status.name() == 'PENDING'}">
-                            <form th:action="@{/admin/registrations/{id}/approve(id=${reg.id})}"
-                                  method="post">
-                                <input type="hidden" name="eventId" th:value="${event.id}"/>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-check-lg me-1"></i>Zatwierdź
-                                </button>
-                            </form>
-                            <form th:action="@{/admin/registrations/{id}/reject(id=${reg.id})}"
-                                  method="post">
-                                <input type="hidden" name="eventId" th:value="${event.id}"/>
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="bi bi-x-lg me-1"></i>Odrzuć
-                                </button>
-                            </form>
+                                <dt class="col-sm-4">Kategoria</dt>
+                                <dd class="col-sm-8" th:text="${reg.category.name}">Kategoria</dd>
+                            </dl>
+
+                            <div class="js-edit-mode d-none">
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Imię</label>
+                                    <input type="text" class="form-control form-control-sm" name="firstName"
+                                           th:value="${firstName}" required/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Nazwisko</label>
+                                    <input type="text" class="form-control form-control-sm" name="lastName"
+                                           th:value="${lastName}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Data urodzenia</label>
+                                    <input type="date" class="form-control form-control-sm" name="dateOfBirth"
+                                           th:value="${reg.competitor.dateOfBirth}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">E-mail</label>
+                                    <input type="email" class="form-control form-control-sm" name="email"
+                                           th:value="${reg.competitor.email}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Telefon</label>
+                                    <input type="text" class="form-control form-control-sm" name="phone"
+                                           th:value="${reg.competitor.phone}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Klub</label>
+                                    <input type="text" class="form-control form-control-sm" name="club"
+                                           th:value="${reg.competitor.club}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Chip</label>
+                                    <input type="text" class="form-control form-control-sm" name="chipNumber"
+                                           th:value="${reg.chipNumber}"/>
+                                </div>
+                                <div class="small text-muted">
+                                    Kategoria: <span th:text="${reg.category.name}">Kategoria</span>
+                                </div>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-outline-secondary"
-                                data-bs-dismiss="modal">Zamknij</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-primary js-edit-btn">
+                                <i class="bi bi-pencil me-1"></i>Edytuj
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary js-cancel-btn d-none">
+                                Anuluj
+                            </button>
+                            <button type="submit" class="btn btn-success js-save-btn d-none">
+                                <i class="bi bi-check-lg me-1"></i>Zapisz
+                            </button>
+                        </div>
+                    </form>
+                    <div class="modal-footer js-view-mode pt-0"
+                         th:if="${reg.status.name() == 'PENDING'}">
+                        <form th:action="@{/admin/registrations/{id}/approve(id=${reg.id})}"
+                              method="post" class="me-auto">
+                            <input type="hidden" name="eventId" th:value="${event.id}"/>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Zatwierdź
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/registrations/{id}/reject(id=${reg.id})}"
+                              method="post">
+                            <input type="hidden" name="eventId" th:value="${event.id}"/>
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-x-lg me-1"></i>Odrzuć
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -194,6 +246,29 @@
                         event.preventDefault();
                         showFallbackModal(modalEl);
                     }
+                });
+            });
+
+            function setEditMode(modalEl, editing) {
+                modalEl.querySelectorAll('.js-view-mode').forEach(function (el) {
+                    el.classList.toggle('d-none', editing);
+                });
+                modalEl.querySelector('.js-edit-mode').classList.toggle('d-none', !editing);
+                modalEl.querySelector('.js-edit-btn').classList.toggle('d-none', editing);
+                modalEl.querySelector('.js-cancel-btn').classList.toggle('d-none', !editing);
+                modalEl.querySelector('.js-save-btn').classList.toggle('d-none', !editing);
+            }
+
+            document.querySelectorAll('.js-competitor-form').forEach(function (form) {
+                const modalEl = form.closest('.modal');
+                form.querySelector('.js-edit-btn').addEventListener('click', function () {
+                    setEditMode(modalEl, true);
+                });
+                form.querySelector('.js-cancel-btn').addEventListener('click', function () {
+                    setEditMode(modalEl, false);
+                });
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    setEditMode(modalEl, false);
                 });
             });
         });

@@ -203,6 +203,25 @@ public class AdminController {
         return "redirect:/admin/events/" + eventId + "/registrations";
     }
 
+    @PostMapping("/registrations/{id}/competitor")
+    public String updateCompetitor(@PathVariable Long id,
+                                   @RequestParam String firstName,
+                                   @RequestParam String lastName,
+                                   @RequestParam(required = false) String email,
+                                   @RequestParam(required = false) String phone,
+                                   @RequestParam(required = false)
+                                   @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+                                   java.time.LocalDate dateOfBirth,
+                                   @RequestParam(required = false) String club,
+                                   @RequestParam(required = false) String chipNumber,
+                                   @RequestParam String returnUrl,
+                                   RedirectAttributes ra) {
+        registrationService.updateCompetitor(id, firstName, lastName, email, phone,
+                dateOfBirth, club, chipNumber);
+        ra.addFlashAttribute("successMessage", "Dane zawodnika zaktualizowane.");
+        return "redirect:" + returnUrl;
+    }
+
     @PostMapping("/registrations/{id}/reject")
     public String reject(@PathVariable Long id,
                          @RequestParam Long eventId,
