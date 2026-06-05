@@ -214,59 +214,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            function closeFallbackModal(modalEl) {
-                modalEl.classList.remove('show');
-                modalEl.style.display = 'none';
-                modalEl.setAttribute('aria-hidden', 'true');
-                modalEl.removeAttribute('aria-modal');
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = '';
-                document.querySelectorAll('.js-modal-backdrop').forEach(function (backdrop) {
-                    backdrop.remove();
-                });
-            }
-
-            function showFallbackModal(modalEl) {
-                modalEl.classList.add('show');
-                modalEl.style.display = 'block';
-                modalEl.removeAttribute('aria-hidden');
-                modalEl.setAttribute('aria-modal', 'true');
-                document.body.classList.add('modal-open');
-                document.body.style.overflow = 'hidden';
-
-                if (!document.querySelector('.js-modal-backdrop')) {
-                    const backdrop = document.createElement('div');
-                    backdrop.className = 'modal-backdrop fade show js-modal-backdrop';
-                    document.body.appendChild(backdrop);
-                }
-
-                modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (closeButton) {
-                    closeButton.addEventListener('click', function () {
-                        closeFallbackModal(modalEl);
-                    }, { once: true });
-                });
-
-                modalEl.addEventListener('click', function (event) {
-                    if (event.target === modalEl) {
-                        closeFallbackModal(modalEl);
-                    }
-                }, { once: true });
-            }
-
-            document.querySelectorAll('.js-competitor-modal-trigger').forEach(function (trigger) {
-                trigger.addEventListener('click', function (event) {
-                    const selector = trigger.getAttribute('data-bs-target');
-                    const modalEl = selector ? document.querySelector(selector) : null;
-                    if (!modalEl) return;
-
-                    if (window.bootstrap) {
-                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-                    } else {
-                        event.preventDefault();
-                        showFallbackModal(modalEl);
-                    }
-                });
-            });
+            // Otwieranie modala obsługuje natywnie Bootstrap przez data-bs-toggle="modal".
+            // (Wcześniejszy ręczny .show() dublował wywołanie i zostawiał osierocony
+            //  backdrop blokujący kliknięcia — strona wyglądała na „zawieszoną".)
 
             function setEditMode(modalEl, editing) {
                 modalEl.querySelectorAll('.js-view-mode').forEach(function (el) {

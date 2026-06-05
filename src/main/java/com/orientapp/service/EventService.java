@@ -101,6 +101,7 @@ public class EventService {
         event.setLongitude(updated.getLongitude());
         event.setDescription(updated.getDescription());
         event.setRegulations(updated.getRegulations());
+        event.setMaxParticipants(updated.getMaxParticipants());
         event.setStatus(updated.getStatus());
         return eventRepository.save(event);
     }

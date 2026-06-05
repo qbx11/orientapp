@@ -36,6 +36,7 @@
                             </p>
                             <p class="card-text small" th:if="${event.description}"
                                th:text="${#strings.abbreviate(event.description, 120)}">Opis</p>
+                            <p class="go-link small fw-semibold mb-0 mt-2">Szczegóły i zapisy <i class="bi bi-arrow-right ms-1"></i></p>
                         </div>
                     </div>
                 </a>
@@ -51,7 +52,7 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <div class="col" th:each="event : ${pastEvents}">
                 <a th:href="@{/events/{id}(id=${event.id})}" class="text-decoration-none text-reset">
-                    <div class="card h-100 event-card border-secondary">
+                    <div class="card h-100 event-card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title mb-0 text-secondary" th:text="${event.name}">Nazwa</h5>
@@ -66,9 +67,7 @@
                                 <i class="bi bi-geo-alt me-1"></i>
                                 <span th:text="${event.location}">Miejsce</span>
                             </p>
-                            <p class="small text-muted mb-0">
-                                <i class="bi bi-trophy me-1"></i>Wyniki dostępne
-                            </p>
+                            <p class="go-link small fw-semibold mb-0 mt-2">Zobacz wyniki <i class="bi bi-arrow-right ms-1"></i></p>
                         </div>
                     </div>
                 </a>

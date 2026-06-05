@@ -74,6 +74,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(51.1079)
                 .longitude(17.0385)
                 .description("Studencki Nocny Bieg na Orientację. Zawody dla studentów wrocławskich uczelni.")
+                .maxParticipants(60)
                 .status(EventStatus.OPEN)
                 .build());
 
@@ -88,6 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(50.9044)
                 .longitude(15.7197)
                 .description("Pierwsza runda Ligi Wiosennej. Trasy przez Karkonosze.")
+                .maxParticipants(120)
                 .status(EventStatus.CLOSED)
                 .build());
 
