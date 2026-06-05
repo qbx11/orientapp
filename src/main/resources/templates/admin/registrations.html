@@ -39,7 +39,7 @@
         </div>
         <div class="table-responsive">
             <table class="table table-hover table-sm align-middle mb-0">
-                <thead class="table-light">
+                <thead class="chrome">
                 <tr>
                     <th>Imię i Nazwisko</th>
                     <th>Klub</th>
@@ -48,16 +48,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="reg : ${entry.value}">
-                    <td class="fw-semibold">
-                        <button type="button"
-                                class="btn btn-link btn-sm p-0 fw-semibold text-decoration-none align-baseline js-competitor-modal-trigger"
-                                data-bs-toggle="modal"
-                                th:attr="data-bs-target=|#competitorModal${reg.id}|"
-                                th:text="${reg.competitor.fullName}">
-                            Zawodnik
-                        </button>
-                    </td>
+                <tr th:each="reg : ${entry.value}"
+                    class="js-competitor-modal-trigger"
+                    style="cursor: pointer;"
+                    th:attr="data-bs-target=|#competitorModal${reg.id}|">
+                    <td class="fw-semibold" th:text="${reg.competitor.fullName}">Zawodnik</td>
                     <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
                     <td class="text-muted small" th:text="${reg.chipNumber ?: '—'}">Chip</td>
                     <td>

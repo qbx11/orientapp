@@ -55,6 +55,9 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String regulations;
 
+    /** Maksymalna liczba zawodników (limit miejsc); opcjonalna. */
+    private Integer maxParticipants;
+
     /** Status zawodów; domyślnie {@link EventStatus#DRAFT}. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,0 +1,678 @@
+/* ==========================================================================
+   OrientApp — system designu (ciemnoszary + pomarańczowy)
+   Motyw lampionu BnO: kwadrat przecięty przekątną, dolny trójkąt pomarańczowy.
+   Tokeny kolorów, typografia, motyw ciemny/jasny + mostek na klasy Bootstrap 5.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. Tokeny — motyw ciemny (domyślny)
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+    /* Akcent (pomarańcz marki) */
+    --accent: #f2691e;
+    --accent-strong: hsl(26 89% 47%);
+    --accent-soft: rgba(242, 105, 30, .14);
+    --accent-ring: rgba(242, 105, 30, .35);
+    --on-accent: #16110c;
+
+    /* Powierzchnie */
+    --bg: #16181c;
+    --surface: #1e2127;
+    --surface-2: #25282f;
+    --surface-hover: #2a2e36;
+    --border: #2f333c;
+    --border-strong: #3a3f4a;
+
+    /* Tekst */
+    --ink: #f4f5f7;
+    --ink-2: #b6bbc4;
+    --ink-3: #7e8590;
+
+    /* Statusy (znaczenie, nie dekoracja) */
+    --ok: #1f9d57;
+    --ok-soft: rgba(31, 157, 87, .16);
+    --neutral: #6b7280;
+    --neutral-soft: rgba(107, 114, 128, .18);
+    --danger: #e5564b;
+    --danger-soft: rgba(229, 86, 75, .14);
+    --info: #3a7bd5;
+    --info-soft: rgba(58, 123, 213, .16);
+
+    /* Cienie */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 6px rgba(0, 0, 0, .28);
+    --shadow: 0 8px 24px rgba(0, 0, 0, .45), 0 2px 8px rgba(0, 0, 0, .35);
+    --glow: 0 6px 18px rgba(242, 105, 30, .32);
+
+    /* Promienie */
+    --r-card: 18px;
+    --r-btn: 12px;
+    --r-input: 11px;
+    --r-icon: 10px;
+    --r-pill: 999px;
+
+    color-scheme: dark;
+}
+
+/* "Chrome" — stałe ciemne elementy (zawsze ciemne, niezależnie od motywu) */
+:root {
+    --chrome-bg: #20242b;
+    --chrome-ink: #f4f5f7;
+    --chrome-ink-2: #9aa1ac;
+    --chrome-border: #313640;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tokeny — motyw jasny ("jasne karty"). Chrome pozostaje ciemne.
+   -------------------------------------------------------------------------- */
+[data-theme="light"] {
+    --bg: #eceef1;
+    --surface: #ffffff;
+    --surface-2: #f4f6f8;
+    --surface-hover: #f0f2f5;
+    --border: #e2e6ea;
+    --border-strong: #d3d8de;
+
+    --ink: #14171c;
+    --ink-2: #525a66;
+    --ink-3: #8b929c;
+
+    --shadow-sm: 0 1px 2px rgba(20, 30, 50, .06), 0 2px 8px rgba(20, 30, 50, .07);
+    --shadow: 0 10px 30px rgba(20, 30, 50, .12), 0 2px 8px rgba(20, 30, 50, .08);
+
+    color-scheme: light;
+}
+
+/* --------------------------------------------------------------------------
+   3. Mostek na zmienne Bootstrapa — istniejące strony przejmują motyw
+   -------------------------------------------------------------------------- */
+:root {
+    --bs-body-bg: var(--bg);
+    --bs-body-color: var(--ink-2);
+    --bs-emphasis-color: var(--ink);
+    --bs-heading-color: var(--ink);
+    --bs-secondary-color: var(--ink-3);
+    --bs-tertiary-color: var(--ink-3);
+    --bs-border-color: var(--border);
+    --bs-border-color-translucent: var(--border);
+
+    --bs-body-font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --bs-body-font-size: 15px;
+    --bs-body-line-height: 1.6;
+
+    --bs-primary: var(--accent);
+    --bs-primary-rgb: 242, 105, 30;
+    --bs-link-color: var(--accent);
+    --bs-link-color-rgb: 242, 105, 30;
+    --bs-link-hover-color: var(--accent-strong);
+
+    --bs-card-bg: var(--surface);
+    --bs-card-border-color: var(--border);
+    --bs-card-border-radius: var(--r-card);
+    --bs-card-inner-border-radius: calc(var(--r-card) - 1px);
+
+    --bs-tertiary-bg: var(--surface-2);
+    --bs-secondary-bg: var(--surface-2);
+}
+
+/* --------------------------------------------------------------------------
+   4. Baza
+   -------------------------------------------------------------------------- */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+    font-family: var(--bs-body-font-family);
+    background: var(--bg);
+    color: var(--ink-2);
+    transition: background-color .2s ease, color .2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 { color: var(--ink); font-weight: 700; letter-spacing: -.02em; }
+h1 { letter-spacing: -.028em; line-height: 1.05; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-strong); }
+
+::selection { background: var(--accent); color: var(--on-accent); }
+
+/* Dane liczbowe — monospaced z równą szerokością cyfr */
+.mono, .tnum {
+    font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -.01em;
+}
+
+/* Scrollbar */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--r-pill); border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* --------------------------------------------------------------------------
+   5. Typografia pomocnicza
+   -------------------------------------------------------------------------- */
+.text-muted { color: var(--ink-3) !important; }
+.text-secondary { color: var(--ink-2) !important; }
+.ink { color: var(--ink) !important; }
+.ink-2 { color: var(--ink-2) !important; }
+.ink-3 { color: var(--ink-3) !important; }
+.text-accent { color: var(--accent) !important; }
+
+/* Etykieta sekcji (overline) — pomarańczowa ikona + WERSALIKI ze spacingiem */
+.section-label {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .11em; color: var(--ink-2); margin-bottom: 1rem;
+}
+.section-label i { color: var(--accent); font-size: 1.05em; }
+
+/* --------------------------------------------------------------------------
+   6. Chrome — stałe ciemne elementy
+   -------------------------------------------------------------------------- */
+.chrome {
+    background: var(--chrome-bg);
+    color: var(--chrome-ink);
+    border-color: var(--chrome-border);
+}
+.chrome a { color: var(--chrome-ink-2); }
+.chrome a:hover, .chrome a.active { color: var(--accent); }
+
+/* --------------------------------------------------------------------------
+   7. Logo / znak flagi (placeholder — finalne logo wstawiane jako obraz)
+   -------------------------------------------------------------------------- */
+.flagmark {
+    display: inline-block; flex-shrink: 0; aspect-ratio: 1;
+    border-radius: 27%; overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+    /* Tryb ciemny: górny trójkąt subtelny. */
+    --flag-paper: rgba(255, 255, 255, .16);
+    --flag-line: rgba(255, 255, 255, .5);
+}
+/* Tryb jasny: ciemnoszary trójkąt logo zmienia się na jasny (pełna biel). */
+[data-theme="light"] .flagmark {
+    --flag-paper: #ffffff;
+    --flag-line: rgba(255, 255, 255, .9);
+}
+.flagmark .fm-paper { fill: var(--flag-paper); }
+.flagmark .fm-flag { fill: var(--accent); }
+.flagmark .fm-line { stroke: var(--flag-line); }
+.wordmark {
+    font-weight: 700; letter-spacing: -.02em; font-size: 1.15rem;
+    color: var(--chrome-ink); white-space: nowrap;
+}
+.wordmark .accent { color: var(--accent); }
+
+/* --------------------------------------------------------------------------
+   8. Przyciski
+   -------------------------------------------------------------------------- */
+.btn { font-weight: 600; border-radius: var(--r-btn); border: 1.5px solid transparent; letter-spacing: -.01em; transition: transform .12s ease, box-shadow .15s ease, background-color .15s, border-color .15s, color .15s; }
+.btn-sm { border-radius: 9px; padding: .35rem .7rem; font-size: 13.5px; }
+.btn-lg { border-radius: 14px; }
+
+.btn-primary,
+.btn-accent {
+    --bs-btn-color: var(--on-accent);
+    --bs-btn-bg: var(--accent);
+    --bs-btn-border-color: var(--accent);
+    --bs-btn-hover-color: var(--on-accent);
+    --bs-btn-hover-bg: var(--accent-strong);
+    --bs-btn-hover-border-color: var(--accent-strong);
+    --bs-btn-active-bg: var(--accent-strong);
+    --bs-btn-active-border-color: var(--accent-strong);
+    --bs-btn-disabled-bg: var(--accent);
+    --bs-btn-disabled-border-color: var(--accent);
+    color: var(--on-accent);
+    background: var(--accent);
+    border: 1.5px solid var(--accent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), var(--glow);
+}
+.btn-primary:hover,
+.btn-accent:hover { color: var(--on-accent); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 8px 22px rgba(242, 105, 30, .42); }
+
+/* Ghost — przezroczysty, obramowanie, na hover pomarańcz */
+.btn-ghost {
+    color: var(--ink); background: transparent;
+    border: 1.5px solid var(--border-strong);
+}
+.btn-ghost:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+/* Dark — tło chrome */
+.btn-dark {
+    --bs-btn-bg: var(--chrome-bg); --bs-btn-border-color: var(--chrome-border);
+    --bs-btn-hover-bg: #1a1c21; --bs-btn-hover-border-color: var(--chrome-border);
+    color: var(--chrome-ink);
+}
+
+/* Danger ghost — czerwone obramowanie, przezroczyste tło */
+.btn-danger-ghost {
+    color: var(--danger); background: transparent;
+    border: 1.5px solid var(--danger);
+}
+.btn-danger-ghost:hover { color: #fff; background: var(--danger); border-color: var(--danger); }
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--ink-2); --bs-btn-border-color: var(--border-strong);
+    --bs-btn-hover-color: var(--accent); --bs-btn-hover-bg: var(--accent-soft); --bs-btn-hover-border-color: var(--accent);
+    --bs-btn-active-bg: var(--accent-soft); --bs-btn-active-border-color: var(--accent);
+}
+
+/* Outline-primary — widoczne obramowanie (m.in. wybór kategorii: radio btn-check).
+   Bazowy .btn wymusza border transparent, więc border ustawiamy tu wprost. */
+.btn-outline-primary {
+    --bs-btn-color: var(--ink-2); --bs-btn-bg: var(--surface);
+    --bs-btn-hover-color: var(--accent); --bs-btn-hover-bg: var(--accent-soft); --bs-btn-hover-border-color: var(--accent);
+    --bs-btn-active-color: var(--on-accent); --bs-btn-active-bg: var(--accent); --bs-btn-active-border-color: var(--accent);
+    color: var(--ink-2); background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+}
+.btn-outline-primary:hover {
+    color: var(--accent); background: var(--accent-soft); border-color: var(--accent);
+}
+/* Zaznaczona opcja (radio/checkbox z btn-check) */
+.btn-check:checked + .btn-outline-primary,
+.btn-check:active + .btn-outline-primary {
+    color: var(--on-accent); background: var(--accent); border-color: var(--accent);
+}
+.btn-check:checked + .btn-outline-primary .text-muted {
+    color: rgba(255, 255, 255, .8) !important;
+}
+.btn-check:focus-visible + .btn-outline-primary {
+    box-shadow: 0 0 0 .2rem var(--accent-soft);
+}
+
+/* Wyciszone usuwanie (np. krzyżyk kasowania kategorii/trasy) — czerwień dopiero na hover */
+.btn-outline-danger {
+    --bs-btn-color: var(--ink-3); --bs-btn-border-color: var(--border-strong);
+    --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--danger); --bs-btn-hover-border-color: var(--danger);
+    --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--danger); --bs-btn-active-border-color: var(--danger);
+}
+
+/* Małe kwadratowe ikony-przyciski (akcje w tabeli) */
+.icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: var(--r-icon);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--ink-2); transition: background-color .15s, border-color .15s, color .15s;
+}
+.icon-btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.icon-btn.edit:hover { color: var(--ink); }
+.icon-btn.people:hover { color: var(--info); border-color: var(--info); }
+.icon-btn.results:hover { color: var(--ok); border-color: var(--ok); }
+.icon-btn.delete:hover { color: var(--danger); border-color: var(--danger); }
+
+/* --------------------------------------------------------------------------
+   9. Karty i powierzchnie
+   -------------------------------------------------------------------------- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    color: var(--ink-2);
+}
+.card-body { padding: 1.5rem; }
+.surface-2 { background: var(--surface-2) !important; }
+
+/* Trójkątny pomarańczowy narożnik (motyw flagi) — w prawym górnym rogu */
+.flag-corner { position: relative; overflow: hidden; }
+.flag-corner::after {
+    content: ""; position: absolute; top: 0; right: 0;
+    border-style: solid; border-width: 0 34px 34px 0;
+    border-color: transparent var(--accent) transparent transparent;
+    pointer-events: none;
+}
+.flag-corner.muted::after { border-right-color: var(--border-strong); }
+
+/* Karta zawodów (lista) */
+.event-card {
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+    height: 100%;
+}
+.event-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+.event-card.past { opacity: .92; }
+.event-card .go-link { color: var(--accent); font-weight: 600; transition: gap .15s; }
+.event-card:hover .go-link i { transform: translateX(3px); }
+.event-card .go-link i { transition: transform .15s ease; }
+
+/* Wiersz meta */
+.meta-row { display: flex; align-items: center; gap: .5rem; color: var(--ink-2); }
+.meta-row i { color: var(--ink-3); width: 1.1rem; text-align: center; }
+
+/* Kafelki statystyk (dashboard) — tylko kolorowa ramka, bez wypełnienia.
+   Kolor przenosimy zmienną --c (ramka + ikona); liczby/etykiety neutralne. */
+.stat-tile { border: 1.5px solid var(--c, var(--border)); transition: transform .15s ease, box-shadow .2s; }
+.stat-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.stat-tile .stat-ico { color: var(--c); }
+.stat-tile.c-blue { --c: var(--info); }
+.stat-tile.c-green { --c: var(--ok); }
+.stat-tile.c-orange { --c: var(--accent); }
+.stat-tile.c-gray { --c: var(--neutral); }
+
+/* Karta statystyki (dashboard) */
+.stat-card { display: flex; align-items: center; gap: 1rem; transition: transform .15s ease, box-shadow .2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.icon-square {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px; font-size: 1.25rem; flex-shrink: 0;
+}
+.icon-square.blue { background: var(--info-soft); color: var(--info); }
+.icon-square.green { background: var(--ok-soft); color: var(--ok); }
+.icon-square.orange { background: var(--accent-soft); color: var(--accent); }
+.icon-square.gray { background: var(--neutral-soft); color: var(--neutral); }
+.stat-value { font-size: 34px; font-weight: 700; color: var(--ink); line-height: 1; }
+.stat-label { font-size: 13px; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   10. Badge statusu — pigułka z kropką
+   -------------------------------------------------------------------------- */
+.app-badge {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .3rem .7rem; border-radius: var(--r-pill);
+    font-size: 12.5px; font-weight: 600; line-height: 1;
+}
+.app-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.app-badge.ok { color: var(--ok); background: var(--ok-soft); }
+.app-badge.neutral { color: var(--neutral); background: var(--neutral-soft); }
+.app-badge.warn { color: var(--accent); background: var(--accent-soft); }
+.app-badge.danger { color: var(--danger); background: var(--danger-soft); }
+.app-badge.big { font-size: 13px; padding: 7px 13px; }
+
+/* Mostek na badge'e Bootstrapa, gdyby gdzieś zostały */
+.badge.bg-success { background: var(--ok-soft) !important; color: var(--ok) !important; }
+.badge.bg-secondary { background: var(--neutral-soft) !important; color: var(--neutral) !important; }
+.badge.bg-warning { background: var(--accent-soft) !important; color: var(--accent) !important; }
+.badge.bg-danger { background: var(--danger-soft) !important; color: var(--danger) !important; }
+
+/* --------------------------------------------------------------------------
+   11. Formularze
+   -------------------------------------------------------------------------- */
+.form-label { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: .4rem; }
+.form-text, .form-hint { font-size: 12.5px; color: var(--ink-3); }
+.req { color: var(--danger); }
+
+.form-control, .form-select {
+    background-color: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-input);
+    color: var(--ink);
+    padding: .6rem .85rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+.form-control::placeholder { color: var(--ink-3); }
+.form-control:focus, .form-select:focus {
+    background-color: var(--surface-2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
+    color: var(--ink);
+}
+/* Jawne właściwości tła — bez nich strzałka kafelkowała się po szerokości pola */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237e8590' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right .85rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+}
+
+/* Małe pola i przyciski — równa wysokość (np. wiersz „Dodaj kategorię") */
+.form-control-sm, .form-select-sm { padding: .35rem .65rem; font-size: 13.5px; border-radius: 9px; }
+.form-select-sm { background-position: right .6rem center; padding-right: 2rem; }
+.is-invalid, .form-control.is-invalid { border-color: var(--danger) !important; }
+.invalid-feedback { color: var(--danger); font-size: 12.5px; }
+
+/* --------------------------------------------------------------------------
+   12. Tabele — nagłówek na tle chrome
+   -------------------------------------------------------------------------- */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--ink-2);
+    --bs-table-border-color: var(--border);
+    color: var(--ink-2);
+    margin-bottom: 0;
+}
+.table > thead.chrome th,
+.table > thead th.chrome { background: var(--chrome-bg); color: var(--chrome-ink); border-color: var(--chrome-border); }
+.table > thead th { font-weight: 600; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+.table > tbody td { border-color: var(--border); padding: .85rem 1rem; vertical-align: middle; }
+.table > tbody tr:hover td { background: var(--surface-hover); }
+.table-card { overflow: hidden; border-radius: var(--r-card); }
+.table-card .table > thead th:first-child { border-top-left-radius: 0; }
+
+/* --------------------------------------------------------------------------
+   13. Alerty / komunikaty
+   -------------------------------------------------------------------------- */
+.alert { border-radius: var(--r-card); border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); }
+.alert-success { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+.alert-danger { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+.alert-info { background: var(--info-soft); border-color: transparent; color: var(--info); }
+.alert-warning { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+/* Okruszki nawigacji */
+.breadcrumb-nav { display: inline-flex; padding: 0; margin-bottom: 1.25rem; background: transparent; }
+.breadcrumb { margin: 0; --bs-breadcrumb-divider-color: var(--ink-3); font-size: 14px; }
+.breadcrumb-item a { color: var(--accent); }
+.breadcrumb-item.active { color: var(--ink-3); }
+.breadcrumb-item + .breadcrumb-item::before { content: "\F285"; font-family: "bootstrap-icons"; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   14. Górny pasek (publiczny) — chrome, sticky
+   -------------------------------------------------------------------------- */
+.topbar {
+    position: sticky; top: 0; z-index: 1030;
+    height: 70px; display: flex; align-items: center;
+    background: var(--chrome-bg); border-bottom: 1px solid var(--chrome-border);
+}
+.topbar .brand { display: flex; align-items: center; gap: .6rem; }
+.topbar .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+.topbar .nav-links a, .topbar .nav-links button {
+    color: var(--chrome-ink-2); font-weight: 600; font-size: 15px;
+    background: none; border: none; padding: 0; transition: color .15s;
+}
+.topbar .nav-links a:hover, .topbar .nav-links a.active,
+.topbar .nav-links button:hover { color: var(--accent); }
+
+/* Stopka — chrome */
+.app-footer { background: var(--chrome-bg); color: var(--chrome-ink-2); border-top: 1px solid var(--chrome-border); }
+.app-footer h5, .app-footer h6 { color: var(--chrome-ink); }
+.app-footer a { color: var(--chrome-ink-2); }
+.app-footer a:hover { color: var(--accent); }
+
+/* --------------------------------------------------------------------------
+   15. Boczne menu admina — chrome
+   -------------------------------------------------------------------------- */
+.admin-sidebar {
+    width: 244px; flex-shrink: 0; min-height: 100vh;
+    position: sticky; top: 0; align-self: flex-start;
+    background: var(--chrome-bg); border-right: 1px solid var(--chrome-border);
+    display: flex; flex-direction: column; padding: 1.25rem .9rem;
+}
+.admin-sidebar .brand { display: flex; align-items: center; gap: .55rem; padding: .25rem .4rem 1.25rem; }
+.admin-sidebar .nav-link {
+    display: flex; align-items: center; gap: .7rem;
+    color: var(--chrome-ink-2); font-weight: 600; font-size: 15px;
+    padding: .65rem .8rem; border-radius: var(--r-btn); margin-bottom: .25rem;
+    transition: background-color .15s, color .15s;
+}
+.admin-sidebar .nav-link i { font-size: 1.1rem; width: 1.3rem; text-align: center; }
+.admin-sidebar .nav-link:hover { color: var(--chrome-ink); background: rgba(255, 255, 255, .04); }
+.admin-sidebar .nav-link.active { color: var(--on-accent); background: var(--accent); }
+.admin-user { display: flex; align-items: center; gap: .65rem; padding: .75rem .4rem; }
+.admin-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: var(--accent); color: var(--on-accent);
+    display: inline-flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.admin-user .name { color: var(--chrome-ink); font-weight: 600; font-size: 14px; line-height: 1.2; }
+.admin-user .role { color: var(--chrome-ink-2); font-size: 12px; }
+
+/* Obszar treści admina — pełna szerokość z marginesem */
+.admin-main { flex: 1; min-width: 0; padding: 2rem 3rem; }
+.page-container { padding: 2rem 3rem; }
+
+/* --------------------------------------------------------------------------
+   16. Przełącznik motywu
+   -------------------------------------------------------------------------- */
+.theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: var(--r-icon);
+    background: transparent; border: 1px solid var(--chrome-border);
+    color: var(--chrome-ink-2); cursor: pointer; transition: color .15s, border-color .15s;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.theme-toggle .bi-sun { display: none; }
+[data-theme="light"] .theme-toggle .bi-sun { display: inline; }
+[data-theme="light"] .theme-toggle .bi-moon-stars { display: none; }
+
+/* --------------------------------------------------------------------------
+   17. Mikrointerakcje
+   -------------------------------------------------------------------------- */
+/* Uwaga: stan końcowy MUSI mieć transform:none — translateY(0) tworzyłby trwały
+   kontekst nakładania, przez który backdrop Bootstrapa zasłaniałby modal
+   (strona wyglądała jak „zawieszona": nie da się kliknąć ani zamknąć okna). */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fadeUp .35s ease both; }
+
+/* Marker mapy (Leaflet) — zostawiamy domyślny, popup w stylu karty */
+.leaflet-popup-content-wrapper { background: var(--surface); color: var(--ink); border-radius: 12px; }
+.leaflet-popup-tip { background: var(--surface); }
+
+/* --------------------------------------------------------------------------
+   18. Ekran „Szczegóły zawodów"
+   -------------------------------------------------------------------------- */
+/* Duży przycisk akcji nagłówka — wys. 56px */
+.btn-hero {
+    display: inline-flex; align-items: center; gap: .55rem;
+    height: 56px; padding: 0 24px; font-size: 17px; border-radius: var(--r-btn);
+}
+.btn-hero i { font-size: 1.1em; }
+
+/* Karta nagłówkowa (pełna szerokość) */
+.event-hero {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+}
+.event-hero-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; flex-wrap: wrap; padding: 26px 30px;
+}
+.event-hero-head { min-width: 260px; }
+.event-hero-title {
+    margin: 14px 0 0; font-size: 34px; font-weight: 700;
+    letter-spacing: -.03em; line-height: 1.05; color: var(--ink);
+}
+.event-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* Pasek szybkich faktów */
+.facts-bar {
+    display: flex; flex-wrap: wrap;
+    border-top: 1px solid var(--border); background: var(--surface-2);
+}
+.fact-cell {
+    flex: 1 1 200px; display: flex; align-items: center; gap: 13px;
+    padding: 18px 30px; border-left: 1px solid var(--border);
+}
+.fact-cell:first-child { border-left: none; }
+.fact-ico { font-size: 20px; color: var(--accent); line-height: 1; }
+.fact-label {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--ink-3);
+}
+.fact-value { margin-top: 3px; font-size: 15.5px; font-weight: 600; color: var(--ink); }
+
+/* Siatka szczegółów: treść + mapa */
+.detail-grid {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 24px; align-items: start;
+}
+.detail-col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+
+/* Karty wewnętrzne (statyczne — bez uniesienia) */
+.detail-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.detail-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 28px; background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    font-size: 18px; font-weight: 700; color: var(--ink);
+}
+.detail-card-header i { font-size: 19px; color: var(--accent); }
+.detail-card-header .map-place {
+    margin-left: 2px; font-size: 14px; font-weight: 400; color: var(--ink-3);
+}
+.detail-card-prose {
+    padding: 22px 28px; line-height: 1.7; color: var(--ink-2); font-size: 15.5px;
+}
+
+/* Lista kategorii */
+.cat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 28px; border-top: 1px solid var(--border);
+}
+.cat-row:first-child { border-top: none; }
+.cat-code { font-weight: 700; font-size: 17px; color: var(--ink); }
+.cat-dist { font-weight: 600; font-size: 16px; color: var(--ink-2); }
+
+/* Karta mapy (sticky) */
+.map-card { position: sticky; top: 92px; }
+.map-card-body { padding: 14px; }
+.map-card-body #event-map {
+    height: 380px; width: 100%; border-radius: 14px;
+    border: 1px solid var(--border); overflow: hidden;
+}
+
+/* Responsywność: jedna kolumna na wąskich ekranach */
+@media (max-width: 991.98px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .map-card { position: static; }
+    .event-hero-title { font-size: 28px; }
+}
+
+/* --------------------------------------------------------------------------
+   19. Dashboard admina — statystyki per zawody na kafelku
+   -------------------------------------------------------------------------- */
+.dash-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.dash-stat {
+    border: 1px solid var(--border); border-radius: var(--r-icon);
+    padding: 10px 6px; text-align: center; background: var(--surface-2);
+}
+.dash-stat .v { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.dash-stat .l {
+    margin-top: 2px; font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--ink-3);
+}
+/* Kafelek „Oczekuje" z wartością > 0 — pomarańczowy sygnał uwagi */
+.dash-stat.is-pending { border-color: var(--accent); background: var(--accent-soft); }
+.dash-stat.is-pending .v { color: var(--accent); }
+.dash-stat.is-pending .l { color: var(--accent); }
+
+/* Kafelki głównych akcji w panelu zawodów */
+.action-card {
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.action-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+.action-ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; border-radius: 12px; font-size: 1.4rem;
+    margin-bottom: 14px;
+}
+.action-ico.blue { background: var(--info-soft); color: var(--info); }
+.action-ico.green { background: var(--ok-soft); color: var(--ok); }
+.action-ico.orange { background: var(--accent-soft); color: var(--accent); }
+.action-card .go-link { color: var(--accent); font-weight: 600; }
+.action-card .go-link i { transition: transform .15s ease; }
+.action-card:hover .go-link i { transform: translateX(3px); }

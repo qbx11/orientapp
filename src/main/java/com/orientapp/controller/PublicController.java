@@ -42,6 +42,7 @@ public class PublicController {
     public String eventDetail(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
         model.addAttribute("categories", categoryService.findByEvent(id));
+        model.addAttribute("participantCount", registrationService.findByEvent(id).size());
         return "public/event-detail";
     }
 
