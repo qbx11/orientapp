@@ -58,7 +58,15 @@
                         <span th:unless="${reg.result != null and reg.result.place != null}"
                               class="text-muted">–</span>
                     </td>
-                    <td th:text="${reg.competitor.fullName}">Zawodnik</td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 fw-semibold text-decoration-none align-baseline js-competitor-modal-trigger"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target=|#competitorResultModal${reg.id}|"
+                                th:text="${reg.competitor.fullName}">
+                            Zawodnik
+                        </button>
+                    </td>
                     <td class="text-muted small" th:text="${reg.competitor.club ?: '—'}">Klub</td>
                     <td>
                         <span th:text="${reg.status.label}"
@@ -95,6 +103,145 @@
             </table>
         </div>
     </div>
+
+    <!-- Modals z danymi zawodników -->
+    <div th:each="entry2 : ${registrationsByCategory}">
+        <div th:each="reg : ${entry2.value}"
+             class="modal fade"
+             th:id="'competitorResultModal' + ${reg.id}"
+             tabindex="-1"
+             th:attr="aria-labelledby=|competitorResultModalLabel${reg.id}|"
+             aria-hidden="true"
+             th:with="firstName=${#strings.contains(reg.competitor.fullName, ' ') ? #strings.substringBefore(reg.competitor.fullName, ' ') : reg.competitor.fullName},
+                      lastName=${#strings.contains(reg.competitor.fullName, ' ') ? #strings.substringAfter(reg.competitor.fullName, ' ') : ''}">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
+                                aria-label="Zamknij"></button>
+                    </div>
+                    <form th:action="@{/admin/registrations/{id}/competitor(id=${reg.id})}" method="post"
+                          class="js-competitor-form">
+                        <input type="hidden" name="returnUrl"
+                               th:value="@{/admin/events/{id}/results(id=${event.id})}"/>
+                        <div class="modal-body pt-0">
+                            <dl class="row mb-0 js-view-mode">
+                                <dt class="col-sm-4">Imię</dt>
+                                <dd class="col-sm-8" th:text="${firstName}">Imię</dd>
+
+                                <dt class="col-sm-4">Nazwisko</dt>
+                                <dd class="col-sm-8" th:text="${lastName ?: '—'}">Nazwisko</dd>
+
+                                <dt class="col-sm-4">Data urodzenia</dt>
+                                <dd class="col-sm-8"
+                                    th:text="${reg.competitor.dateOfBirth != null ? #temporals.format(reg.competitor.dateOfBirth, 'dd.MM.yyyy') : '—'}">
+                                    —
+                                </dd>
+
+                                <dt class="col-sm-4">E-mail</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.email ?: '—'}">—</dd>
+
+                                <dt class="col-sm-4">Telefon</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.phone ?: '—'}">—</dd>
+
+                                <dt class="col-sm-4">Klub</dt>
+                                <dd class="col-sm-8" th:text="${reg.competitor.club ?: '—'}">—</dd>
+
+                                <dt class="col-sm-4">Chip</dt>
+                                <dd class="col-sm-8" th:text="${reg.chipNumber ?: '—'}">—</dd>
+
+                                <dt class="col-sm-4">Kategoria</dt>
+                                <dd class="col-sm-8" th:text="${reg.category.name}">Kategoria</dd>
+                            </dl>
+
+                            <div class="js-edit-mode d-none">
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Imię</label>
+                                    <input type="text" class="form-control form-control-sm" name="firstName"
+                                           th:value="${firstName}" required/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Nazwisko</label>
+                                    <input type="text" class="form-control form-control-sm" name="lastName"
+                                           th:value="${lastName}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Data urodzenia</label>
+                                    <input type="date" class="form-control form-control-sm" name="dateOfBirth"
+                                           th:value="${reg.competitor.dateOfBirth}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">E-mail</label>
+                                    <input type="email" class="form-control form-control-sm" name="email"
+                                           th:value="${reg.competitor.email}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Telefon</label>
+                                    <input type="text" class="form-control form-control-sm" name="phone"
+                                           th:value="${reg.competitor.phone}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Klub</label>
+                                    <input type="text" class="form-control form-control-sm" name="club"
+                                           th:value="${reg.competitor.club}"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Chip</label>
+                                    <input type="text" class="form-control form-control-sm" name="chipNumber"
+                                           th:value="${reg.chipNumber}"/>
+                                </div>
+                                <div class="small text-muted">
+                                    Kategoria: <span th:text="${reg.category.name}">Kategoria</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-primary js-edit-btn">
+                                <i class="bi bi-pencil me-1"></i>Edytuj
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary js-cancel-btn d-none">
+                                Anuluj
+                            </button>
+                            <button type="submit" class="btn btn-success js-save-btn d-none">
+                                <i class="bi bi-check-lg me-1"></i>Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Otwieranie modala obsługuje natywnie Bootstrap przez data-bs-toggle="modal".
+            // (Wcześniejszy ręczny .show() dublował wywołanie i zostawiał osierocony
+            //  backdrop blokujący kliknięcia — strona wyglądała na „zawieszoną".)
+
+            function setEditMode(modalEl, editing) {
+                modalEl.querySelectorAll('.js-view-mode').forEach(function (el) {
+                    el.classList.toggle('d-none', editing);
+                });
+                modalEl.querySelector('.js-edit-mode').classList.toggle('d-none', !editing);
+                modalEl.querySelector('.js-edit-btn').classList.toggle('d-none', editing);
+                modalEl.querySelector('.js-cancel-btn').classList.toggle('d-none', !editing);
+                modalEl.querySelector('.js-save-btn').classList.toggle('d-none', !editing);
+            }
+
+            document.querySelectorAll('.js-competitor-form').forEach(function (form) {
+                const modalEl = form.closest('.modal');
+                form.querySelector('.js-edit-btn').addEventListener('click', function () {
+                    setEditMode(modalEl, true);
+                });
+                form.querySelector('.js-cancel-btn').addEventListener('click', function () {
+                    setEditMode(modalEl, false);
+                });
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    setEditMode(modalEl, false);
+                });
+            });
+        });
+    </script>
 </main>
 </body>
 </html>

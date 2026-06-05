@@ -1,5 +1,6 @@
 package com.orientapp.controller;
 
+import com.orientapp.dto.AdminEventSummary;
 import com.orientapp.dto.CategoryFormDto;
 import com.orientapp.dto.EventFormDto;
 import com.orientapp.dto.ResultFormDto;
@@ -43,21 +44,37 @@ public class AdminController {
 
     @GetMapping
     public String dashboard(Model model) {
-        var events = eventService.findAll();
-        model.addAttribute("totalEvents", events.size());
-        model.addAttribute("openEvents", events.stream()
-                .filter(e -> e.getStatus() == EventStatus.OPEN).count());
-        model.addAttribute("pendingCount", registrationService.countPendingAll());
-        model.addAttribute("events", events);
-        // Dane do wykresu: liczba zgłoszeń per kategoria dla wszystkich eventów
-        var chartData = registrationService.countByCategoryAllEvents();
-        model.addAttribute("chartData", chartData);
-        model.addAttribute("totalRegistrations",
-                chartData.values().stream().mapToLong(Long::longValue).sum());
+        var summaries = eventService.findAll().stream()
+                .map(this::buildSummary)
+                .toList();
+        model.addAttribute("summaries", summaries);
+        model.addAttribute("pendingTotal", summaries.stream().mapToLong(AdminEventSummary::pending).sum());
         return "admin/dashboard";
     }
 
+    /**
+     * Buduje podsumowanie zawodów ze statystykami zgłoszeń (liczone strumieniem w Javie).
+     */
+    private AdminEventSummary buildSummary(Event event) {
+        var regs = registrationService.findByEvent(event.getId());
+        long pending = regs.stream()
+                .filter(r -> r.getStatus() == RegistrationStatus.PENDING).count();
+        long approved = regs.stream()
+                .filter(r -> r.getStatus() == RegistrationStatus.APPROVED).count();
+        long withResults = regs.stream()
+                .filter(r -> r.getResult() != null).count();
+        int categories = categoryService.findByEvent(event.getId()).size();
+        return new AdminEventSummary(event, pending, approved, regs.size(), categories, withResults);
+    }
+
     // ── CRUD zawodów ─────────────────────────────────────────────────────────
+
+    /** Panel pojedynczych zawodów — najważniejsze akcje + statystyki. */
+    @GetMapping("/events/{id}")
+    public String eventPanel(@PathVariable Long id, Model model) {
+        model.addAttribute("summary", buildSummary(eventService.findById(id)));
+        return "admin/event-panel";
+    }
 
     @GetMapping("/events")
     public String eventList(Model model) {
@@ -91,6 +108,7 @@ public class AdminController {
                 .longitude(form.getLongitude())
                 .description(form.getDescription())
                 .regulations(form.getRegulations())
+                .maxParticipants(form.getMaxParticipants())
                 .status(form.getStatus())
                 .build();
         Event saved = eventService.save(event);
@@ -109,6 +127,7 @@ public class AdminController {
         form.setLongitude(event.getLongitude());
         form.setDescription(event.getDescription());
         form.setRegulations(event.getRegulations());
+        form.setMaxParticipants(event.getMaxParticipants());
         form.setStatus(event.getStatus());
 
         model.addAttribute("eventForm", form);
@@ -142,11 +161,12 @@ public class AdminController {
                 .longitude(form.getLongitude())
                 .description(form.getDescription())
                 .regulations(form.getRegulations())
+                .maxParticipants(form.getMaxParticipants())
                 .status(form.getStatus())
                 .build();
         eventService.update(id, updated);
         ra.addFlashAttribute("successMessage", "Zawody zostały zaktualizowane.");
-        return "redirect:/admin/events/" + id + "/edit";
+        return "redirect:/admin/events/" + id;
     }
 
     @PostMapping("/events/{id}/delete")
@@ -201,6 +221,25 @@ public class AdminController {
         registrationService.approve(id);
         ra.addFlashAttribute("successMessage", "Zgłoszenie zatwierdzone.");
         return "redirect:/admin/events/" + eventId + "/registrations";
+    }
+
+    @PostMapping("/registrations/{id}/competitor")
+    public String updateCompetitor(@PathVariable Long id,
+                                   @RequestParam String firstName,
+                                   @RequestParam String lastName,
+                                   @RequestParam(required = false) String email,
+                                   @RequestParam(required = false) String phone,
+                                   @RequestParam(required = false)
+                                   @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+                                   java.time.LocalDate dateOfBirth,
+                                   @RequestParam(required = false) String club,
+                                   @RequestParam(required = false) String chipNumber,
+                                   @RequestParam String returnUrl,
+                                   RedirectAttributes ra) {
+        registrationService.updateCompetitor(id, firstName, lastName, email, phone,
+                dateOfBirth, club, chipNumber);
+        ra.addFlashAttribute("successMessage", "Dane zawodnika zaktualizowane.");
+        return "redirect:" + returnUrl;
     }
 
     @PostMapping("/registrations/{id}/reject")

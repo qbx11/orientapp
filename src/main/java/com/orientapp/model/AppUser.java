@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,6 +45,15 @@ public class AppUser implements UserDetails {
     /** Imię i nazwisko użytkownika. */
     @Column(nullable = false)
     private String fullName;
+
+    /** Adres e-mail podany podczas rejestracji zawodnika. */
+    private String email;
+
+    /** Numer telefonu podany podczas rejestracji zawodnika (opcjonalny). */
+    private String phone;
+
+    /** Data urodzenia podana podczas rejestracji zawodnika. */
+    private LocalDate dateOfBirth;
 
     /** Klub sportowy zawodnika (opcjonalny). */
     private String club;

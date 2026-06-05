@@ -9,9 +9,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a th:href="@{/admin/events}">Zawody</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+            <li class="breadcrumb-item" th:if="${editMode}">
+                <a th:href="@{/admin/events/{id}(id=${event.id})}" th:text="${event.name}">Zawody</a>
+            </li>
             <li class="breadcrumb-item active"
-                th:text="${editMode} ? ${event.name} : 'Nowe zawody'">Formularz</li>
+                th:text="${editMode} ? 'Edycja' : 'Nowe zawody'">Formularz</li>
         </ol>
     </nav>
 
@@ -46,6 +49,16 @@
                                     <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}">STATUS</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="maxParticipants" class="form-label">Limit miejsc</label>
+                            <input type="number" min="1" step="1" class="form-control" id="maxParticipants"
+                                   th:field="*{maxParticipants}"
+                                   th:classappend="${#fields.hasErrors('maxParticipants')} ? 'is-invalid'"
+                                   placeholder="np. 60"/>
+                            <div class="invalid-feedback" th:errors="*{maxParticipants}"></div>
+                            <div class="form-text">Maksymalna liczba zawodników. Zostaw puste, jeśli bez limitu.</div>
                         </div>
 
                         <div class="mb-3">
@@ -110,7 +123,8 @@
                                 <i class="bi bi-check-lg me-1"></i>
                                 <span th:text="${editMode} ? 'Zapisz zmiany' : 'Utwórz zawody'">Zapisz</span>
                             </button>
-                            <a th:href="@{/admin/events}" class="btn btn-outline-secondary">Anuluj</a>
+                            <a th:href="${editMode} ? @{/admin/events/{id}(id=${event.id})} : @{/admin/events}"
+                               class="btn btn-outline-secondary">Anuluj</a>
                         </div>
                     </form>
                 </div>
@@ -163,24 +177,9 @@
                 </div>
             </div>
 
-            <!-- Skróty nawigacyjne -->
-            <div class="d-flex flex-column gap-2 mt-3">
-                <a th:href="@{/admin/events/{id}/registrations(id=${event.id})}"
-                   class="btn btn-outline-primary">
-                    <i class="bi bi-people me-2"></i>Zarządzaj zgłoszeniami
-                </a>
-                <a th:href="@{/admin/events/{id}/results(id=${event.id})}"
-                   class="btn btn-outline-success">
-                    <i class="bi bi-trophy me-2"></i>Panel wyników
-                </a>
-                <a th:href="@{/events/{id}/results(id=${event.id})}"
-                   class="btn btn-outline-secondary" target="_blank">
-                    <i class="bi bi-eye me-2"></i>Podgląd publiczny wyników
-                </a>
-            </div>
-
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     <script th:inline="javascript">
     /*<![CDATA[*/

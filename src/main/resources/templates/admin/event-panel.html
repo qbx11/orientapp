@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/admin :: layout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head><title th:text="${summary.event.name} + ' – Admin'">Zawody – Admin</title></head>
+<body>
+<main>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+            <li class="breadcrumb-item active" th:text="${summary.event.name}">Zawody</li>
+        </ol>
+    </nav>
+
+    <!-- Nagłówek zawodów + edycja -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span th:text="${summary.event.status.label}"
+                      th:class="'app-badge ' + (${summary.event.status.name() == 'OPEN'} ? 'ok' : (${summary.event.status.name() == 'DRAFT'} ? 'warn' : 'neutral'))">
+                    Status</span>
+            </div>
+            <h2 class="h3 mb-1" th:text="${summary.event.name}">Nazwa zawodów</h2>
+            <div class="meta-row">
+                <i class="bi bi-calendar3"></i>
+                <span th:text="${#temporals.format(summary.event.date, 'dd.MM.yyyy')}">01.01.2026</span>
+                <span class="mx-1">·</span>
+                <i class="bi bi-geo-alt"></i>
+                <span th:text="${summary.event.location}">Miejsce</span>
+            </div>
+        </div>
+        <a th:href="@{/admin/events/{id}/edit(id=${summary.event.id})}" class="btn btn-ghost">
+            <i class="bi bi-pencil me-2"></i>Edytuj zawody
+        </a>
+    </div>
+
+    <!-- Statystyki -->
+    <div class="dash-stats mb-4" style="max-width:560px">
+        <div class="dash-stat" th:classappend="${summary.pending > 0} ? 'is-pending'">
+            <div class="v mono" th:text="${summary.pending}">0</div>
+            <div class="l">Oczekuje</div>
+        </div>
+        <div class="dash-stat">
+            <div class="v mono" th:text="${summary.total}">0</div>
+            <div class="l">Zgłoszeń</div>
+        </div>
+        <div class="dash-stat">
+            <div class="v mono" th:text="${summary.categories}">0</div>
+            <div class="l">Kategorii</div>
+        </div>
+        <div class="dash-stat">
+            <div class="v mono" th:text="${summary.withResults}">0</div>
+            <div class="l">Wyników</div>
+        </div>
+    </div>
+
+    <!-- Najważniejsze akcje -->
+    <div class="row g-4">
+        <!-- Zarządzaj zgłoszeniami -->
+        <div class="col-md-6 col-xl-4">
+            <a th:href="@{/admin/events/{id}/registrations(id=${summary.event.id})}"
+               class="card action-card h-100 text-decoration-none">
+                <div class="card-body d-flex flex-column">
+                    <div class="action-ico blue"><i class="bi bi-people"></i></div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="mb-0 ink">Zarządzaj zgłoszeniami</h5>
+                        <span th:if="${summary.pending > 0}" class="app-badge warn"
+                              th:text="${summary.pending} + ' nowe'">0 nowe</span>
+                    </div>
+                    <p class="text-muted small mb-3">Zatwierdzaj i odrzucaj zgłoszenia zawodników.</p>
+                    <span class="go-link mt-auto">Przejdź <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tabela wyników -->
+        <div class="col-md-6 col-xl-4">
+            <a th:href="@{/admin/events/{id}/results(id=${summary.event.id})}"
+               class="card action-card h-100 text-decoration-none">
+                <div class="card-body d-flex flex-column">
+                    <div class="action-ico green"><i class="bi bi-trophy"></i></div>
+                    <h5 class="mb-1 ink">Tabela wyników</h5>
+                    <p class="text-muted small mb-3">Wprowadzaj czasy i zarządzaj wynikami zawodników.</p>
+                    <span class="go-link mt-auto">Przejdź <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Podgląd publiczny -->
+        <div class="col-md-6 col-xl-4">
+            <a th:href="@{/events/{id}(id=${summary.event.id})}" target="_blank"
+               class="card action-card h-100 text-decoration-none">
+                <div class="card-body d-flex flex-column">
+                    <div class="action-ico orange"><i class="bi bi-eye"></i></div>
+                    <h5 class="mb-1 ink">Podgląd publiczny</h5>
+                    <p class="text-muted small mb-3">Zobacz stronę zawodów tak, jak widzą ją uczestnicy.</p>
+                    <span class="go-link mt-auto">Otwórz w nowej karcie <i class="bi bi-box-arrow-up-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
