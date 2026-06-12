@@ -1,5 +1,9 @@
-# OrientApp — platforma zarządzania zawodami w biegu na orientację
+# OrientApp — Aplikacja webowa do zarządzania zawodami w biegu na orientację
 
-🌐 [Aplikacja na żywo (Railway)](https://orientapp-production.up.railway.app)
+[Deploy aplikacji (Railway)](https://orientapp-production.up.railway.app)
 
-📖 [Dokumentacja Javadoc](https://qbx11.github.io/orientapp/javadoc/)
+[Dokumentacja Javadoc](https://qbx11.github.io/orientapp/javadoc/)
+
+[Sprawozdanie](sprawozdanie_orientapp.pdf)
+
+
