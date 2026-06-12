@@ -1,0 +1,8 @@
+com.orientapp
+com.orientapp.config
+com.orientapp.controller
+com.orientapp.dto
+com.orientapp.exception
+com.orientapp.model
+com.orientapp.repository
+com.orientapp.service

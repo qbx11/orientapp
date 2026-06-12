@@ -24,6 +24,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Kontroler panelu administracyjnego ({@code /admin/**}, wymaga roli ADMIN).
+ * <p>
+ * Udostępnia dashboard ze statystykami, panel pojedynczych zawodów, CRUD zawodów
+ * i kategorii, zarządzanie zgłoszeniami (zatwierdzanie/odrzucanie, edycja danych
+ * zawodnika), wprowadzanie wyników oraz edycję punktów trasy GPS.
+ */
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -35,6 +42,13 @@ public class AdminController {
     private final ResultService resultService;
     private final TrackPointService trackPointService;
 
+    /**
+     * Udostępnia bieżący URI żądania we wszystkich widokach panelu
+     * (do podświetlania aktywnej pozycji menu).
+     *
+     * @param request bieżące żądanie HTTP
+     * @return ścieżka URI bieżącego żądania
+     */
     @ModelAttribute("currentUri")
     public String currentUri(HttpServletRequest request) {
         return request.getRequestURI();
@@ -42,6 +56,12 @@ public class AdminController {
 
     // ── Dashboard ────────────────────────────────────────────────────────────
 
+    /**
+     * Dashboard administratora — lista zawodów z podsumowaniem zgłoszeń.
+     *
+     * @param model model widoku (atrybuty {@code summaries}, {@code pendingTotal})
+     * @return nazwa widoku dashboardu
+     */
     @GetMapping
     public String dashboard(Model model) {
         var summaries = eventService.findAll().stream()
@@ -54,6 +74,9 @@ public class AdminController {
 
     /**
      * Buduje podsumowanie zawodów ze statystykami zgłoszeń (liczone strumieniem w Javie).
+     *
+     * @param event zawody, dla których liczone jest podsumowanie
+     * @return podsumowanie ze statystykami (oczekujące, zatwierdzone, łącznie, kategorie, wyniki)
      */
     private AdminEventSummary buildSummary(Event event) {
         var regs = registrationService.findByEvent(event.getId());
@@ -69,19 +92,37 @@ public class AdminController {
 
     // ── CRUD zawodów ─────────────────────────────────────────────────────────
 
-    /** Panel pojedynczych zawodów — najważniejsze akcje + statystyki. */
+    /**
+     * Panel pojedynczych zawodów — najważniejsze akcje i statystyki (hub zawodów).
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybut {@code summary})
+     * @return nazwa widoku panelu zawodów
+     */
     @GetMapping("/events/{id}")
     public String eventPanel(@PathVariable Long id, Model model) {
         model.addAttribute("summary", buildSummary(eventService.findById(id)));
         return "admin/event-panel";
     }
 
+    /**
+     * Lista wszystkich zawodów.
+     *
+     * @param model model widoku
+     * @return nazwa widoku listy zawodów
+     */
     @GetMapping("/events")
     public String eventList(Model model) {
         model.addAttribute("events", eventService.findAll());
         return "admin/events";
     }
 
+    /**
+     * Formularz tworzenia nowych zawodów.
+     *
+     * @param model model widoku
+     * @return nazwa widoku formularza zawodów
+     */
     @GetMapping("/events/new")
     public String newEventForm(Model model) {
         model.addAttribute("eventForm", new EventFormDto());
@@ -90,6 +131,15 @@ public class AdminController {
         return "admin/event-form";
     }
 
+    /**
+     * Zapisuje nowe zawody. Przy błędach walidacji ponownie wyświetla formularz.
+     *
+     * @param form          dane formularza zawodów
+     * @param bindingResult wynik walidacji
+     * @param model         model widoku (używany przy błędach)
+     * @param ra            atrybuty przekierowania (komunikat flash)
+     * @return widok formularza (przy błędach) lub przekierowanie do edycji utworzonych zawodów
+     */
     @PostMapping("/events")
     public String saveEvent(@Valid @ModelAttribute("eventForm") EventFormDto form,
                             BindingResult bindingResult,
@@ -116,6 +166,13 @@ public class AdminController {
         return "redirect:/admin/events/" + saved.getId() + "/edit";
     }
 
+    /**
+     * Formularz edycji istniejących zawodów (wraz z kategoriami).
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku
+     * @return nazwa widoku formularza zawodów
+     */
     @GetMapping("/events/{id}/edit")
     public String editEventForm(@PathVariable Long id, Model model) {
         Event event = eventService.findById(id);
@@ -139,6 +196,16 @@ public class AdminController {
         return "admin/event-form";
     }
 
+    /**
+     * Aktualizuje dane zawodów. Przy błędach walidacji ponownie wyświetla formularz.
+     *
+     * @param id            identyfikator zawodów
+     * @param form          dane formularza zawodów
+     * @param bindingResult wynik walidacji
+     * @param model         model widoku (używany przy błędach)
+     * @param ra            atrybuty przekierowania (komunikat flash)
+     * @return widok formularza (przy błędach) lub przekierowanie do panelu zawodów
+     */
     @PostMapping("/events/{id}")
     public String updateEvent(@PathVariable Long id,
                               @Valid @ModelAttribute("eventForm") EventFormDto form,
@@ -169,6 +236,13 @@ public class AdminController {
         return "redirect:/admin/events/" + id;
     }
 
+    /**
+     * Usuwa zawody.
+     *
+     * @param id identyfikator zawodów
+     * @param ra atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie na listę zawodów
+     */
     @PostMapping("/events/{id}/delete")
     public String deleteEvent(@PathVariable Long id, RedirectAttributes ra) {
         String name = eventService.findById(id).getName();
@@ -179,6 +253,15 @@ public class AdminController {
 
     // ── Kategorie (inline na stronie edycji eventu) ───────────────────────────
 
+    /**
+     * Dodaje kategorię/trasę do zawodów (formularz inline na stronie edycji).
+     *
+     * @param id            identyfikator zawodów
+     * @param form          dane formularza kategorii
+     * @param bindingResult wynik walidacji
+     * @param ra            atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie do edycji zawodów
+     */
     @PostMapping("/events/{id}/categories")
     public String addCategory(@PathVariable Long id,
                               @Valid @ModelAttribute("categoryForm") CategoryFormDto form,
@@ -195,6 +278,14 @@ public class AdminController {
         return "redirect:/admin/events/" + id + "/edit";
     }
 
+    /**
+     * Usuwa kategorię/trasę.
+     *
+     * @param catId   identyfikator kategorii
+     * @param eventId identyfikator zawodów (do przekierowania)
+     * @param ra      atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie do edycji zawodów
+     */
     @PostMapping("/categories/{catId}/delete")
     public String deleteCategory(@PathVariable Long catId,
                                  @RequestParam Long eventId,
@@ -206,6 +297,13 @@ public class AdminController {
 
     // ── Zgłoszenia ────────────────────────────────────────────────────────────
 
+    /**
+     * Lista zgłoszeń na zawody, pogrupowana po kategoriach.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybut {@code registrationsByCategory})
+     * @return nazwa widoku zgłoszeń
+     */
     @GetMapping("/events/{id}/registrations")
     public String registrations(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
@@ -214,6 +312,14 @@ public class AdminController {
         return "admin/registrations";
     }
 
+    /**
+     * Zatwierdza zgłoszenie (status PENDING → APPROVED).
+     *
+     * @param id      identyfikator zgłoszenia
+     * @param eventId identyfikator zawodów (do przekierowania)
+     * @param ra      atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie na listę zgłoszeń zawodów
+     */
     @PostMapping("/registrations/{id}/approve")
     public String approve(@PathVariable Long id,
                           @RequestParam Long eventId,
@@ -223,6 +329,21 @@ public class AdminController {
         return "redirect:/admin/events/" + eventId + "/registrations";
     }
 
+    /**
+     * Aktualizuje dane zawodnika powiązanego ze zgłoszeniem i wraca pod wskazany adres.
+     *
+     * @param id          identyfikator zgłoszenia
+     * @param firstName   imię zawodnika
+     * @param lastName    nazwisko zawodnika
+     * @param email       adres e-mail (opcjonalny)
+     * @param phone       numer telefonu (opcjonalny)
+     * @param dateOfBirth data urodzenia (opcjonalna, format ISO)
+     * @param club        klub sportowy (opcjonalny)
+     * @param chipNumber  numer chipa SI (opcjonalny)
+     * @param returnUrl   adres, na który następuje przekierowanie po zapisie
+     * @param ra          atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie pod adres {@code returnUrl}
+     */
     @PostMapping("/registrations/{id}/competitor")
     public String updateCompetitor(@PathVariable Long id,
                                    @RequestParam String firstName,
@@ -242,6 +363,14 @@ public class AdminController {
         return "redirect:" + returnUrl;
     }
 
+    /**
+     * Odrzuca zgłoszenie (status PENDING → REJECTED).
+     *
+     * @param id      identyfikator zgłoszenia
+     * @param eventId identyfikator zawodów (do przekierowania)
+     * @param ra      atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie na listę zgłoszeń zawodów
+     */
     @PostMapping("/registrations/{id}/reject")
     public String reject(@PathVariable Long id,
                          @RequestParam Long eventId,
@@ -253,6 +382,13 @@ public class AdminController {
 
     // ── Wyniki ────────────────────────────────────────────────────────────────
 
+    /**
+     * Panel wprowadzania wyników — zgłoszenia pogrupowane po kategoriach.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybut {@code registrationsByCategory})
+     * @return nazwa widoku panelu wyników
+     */
     @GetMapping("/events/{id}/results")
     public String resultsPanel(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
@@ -263,6 +399,13 @@ public class AdminController {
 
     // ── TrackPoints ───────────────────────────────────────────────────────────
 
+    /**
+     * Formularz edycji punktów trasy GPS dla danego zgłoszenia.
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @param model          model widoku (atrybuty {@code trackPoints}, {@code registration})
+     * @return nazwa widoku formularza trasy
+     */
     @GetMapping("/registrations/{registrationId}/track")
     public String trackForm(@PathVariable Long registrationId, Model model) {
         if (!model.containsAttribute("trackPointForm")) {
@@ -280,6 +423,17 @@ public class AdminController {
         return "admin/track-form";
     }
 
+    /**
+     * Dodaje pojedynczy punkt trasy GPS do zgłoszenia.
+     * <p>
+     * Przy błędach walidacji zachowuje dane formularza i przekierowuje z powrotem.
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @param form           dane formularza punktu trasy
+     * @param bindingResult  wynik walidacji
+     * @param ra             atrybuty przekierowania (komunikat flash / dane formularza)
+     * @return przekierowanie do formularza trasy
+     */
     @PostMapping("/registrations/{registrationId}/track")
     public String addTrackPoint(@PathVariable Long registrationId,
                                 @Valid @ModelAttribute("trackPointForm") TrackPointFormDto form,
@@ -296,6 +450,14 @@ public class AdminController {
         return "redirect:/admin/registrations/" + registrationId + "/track";
     }
 
+    /**
+     * Usuwa pojedynczy punkt trasy.
+     *
+     * @param pointId        identyfikator punktu trasy
+     * @param registrationId identyfikator zgłoszenia (do przekierowania)
+     * @param ra             atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie do formularza trasy
+     */
     @PostMapping("/track-points/{pointId}/delete")
     public String deleteTrackPoint(@PathVariable Long pointId,
                                    @RequestParam Long registrationId,
@@ -305,6 +467,13 @@ public class AdminController {
         return "redirect:/admin/registrations/" + registrationId + "/track";
     }
 
+    /**
+     * Usuwa całą trasę GPS danego zgłoszenia.
+     *
+     * @param registrationId identyfikator zgłoszenia
+     * @param ra             atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie do formularza trasy
+     */
     @PostMapping("/registrations/{registrationId}/track/clear")
     public String clearTrack(@PathVariable Long registrationId, RedirectAttributes ra) {
         trackPointService.deleteByRegistration(registrationId);
@@ -312,6 +481,14 @@ public class AdminController {
         return "redirect:/admin/registrations/" + registrationId + "/track";
     }
 
+    /**
+     * Zapisuje wynik zawodnika — parsuje czas w formacie {@code HH:mm} lub
+     * {@code HH:mm:ss} na {@link Duration}; dla DNF czas jest pomijany.
+     *
+     * @param form dane formularza wyniku
+     * @param ra   atrybuty przekierowania (komunikat flash)
+     * @return przekierowanie do panelu wyników zawodów
+     */
     @PostMapping("/results")
     public String saveResult(@ModelAttribute ResultFormDto form, RedirectAttributes ra) {
         try {

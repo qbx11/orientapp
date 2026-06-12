@@ -15,6 +15,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * Kontroler części publicznej aplikacji (dostępnej bez logowania).
+ * <p>
+ * Obsługuje stronę główną z listą zawodów, szczegóły zawodów, anonimową
+ * rejestrację zawodników, regulamin, publiczną tabelę wyników oraz podgląd
+ * trasy GPS pojedynczego zawodnika na mapie.
+ */
 @Controller
 @RequiredArgsConstructor
 public class PublicController {
@@ -25,6 +32,12 @@ public class PublicController {
     private final ResultService resultService;
     private final TrackPointService trackPointService;
 
+    /**
+     * Strona główna — wyświetla zawody nadchodzące i zakończone.
+     *
+     * @param model model widoku (atrybuty {@code upcomingEvents}, {@code pastEvents})
+     * @return nazwa widoku listy zawodów
+     */
     @GetMapping("/")
     public String home(Model model) {
         var all = eventService.findUpcoming();
@@ -38,6 +51,13 @@ public class PublicController {
         return "public/events";
     }
 
+    /**
+     * Szczegóły zawodów wraz z listą kategorii i liczbą zapisanych zawodników.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybuty {@code event}, {@code categories}, {@code participantCount})
+     * @return nazwa widoku szczegółów zawodów
+     */
     @GetMapping("/events/{id}")
     public String eventDetail(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
@@ -46,6 +66,13 @@ public class PublicController {
         return "public/event-detail";
     }
 
+    /**
+     * Wyświetla formularz rejestracji zawodnika na dane zawody.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybut {@code registrationForm})
+     * @return nazwa widoku formularza rejestracji
+     */
     @GetMapping("/events/{id}/register")
     public String registerForm(@PathVariable Long id, Model model) {
         Event event = eventService.findById(id);
@@ -57,6 +84,19 @@ public class PublicController {
         return "public/register";
     }
 
+    /**
+     * Przyjmuje zgłoszenie rejestracyjne (status PENDING).
+     * <p>
+     * Przy błędach walidacji ponownie wyświetla formularz; przy zamkniętej
+     * rejestracji zwraca komunikat flash i przekierowuje na stronę zawodów.
+     *
+     * @param id                 identyfikator zawodów
+     * @param form               dane formularza rejestracji
+     * @param bindingResult      wynik walidacji formularza
+     * @param redirectAttributes atrybuty przekierowania (komunikaty flash)
+     * @param model              model widoku (używany przy błędach walidacji)
+     * @return widok formularza (przy błędach) lub przekierowanie na stronę zawodów
+     */
     @PostMapping("/events/{id}/register")
     public String register(@PathVariable Long id,
                            @Valid @ModelAttribute("registrationForm") RegistrationFormDto form,
@@ -82,12 +122,26 @@ public class PublicController {
         return "redirect:/events/" + id;
     }
 
+    /**
+     * Wyświetla regulamin zawodów.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku
+     * @return nazwa widoku regulaminu
+     */
     @GetMapping("/events/{id}/regulations")
     public String regulations(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
         return "public/regulations";
     }
 
+    /**
+     * Publiczna tabela wyników zawodów, pogrupowana po kategoriach.
+     *
+     * @param id    identyfikator zawodów
+     * @param model model widoku (atrybut {@code resultsByCategory})
+     * @return nazwa widoku tabeli wyników
+     */
     @GetMapping("/events/{id}/results")
     public String results(@PathVariable Long id, Model model) {
         model.addAttribute("event", eventService.findById(id));
@@ -95,6 +149,14 @@ public class PublicController {
         return "public/results";
     }
 
+    /**
+     * Podgląd trasy GPS pojedynczego zawodnika na mapie.
+     *
+     * @param eventId        identyfikator zawodów
+     * @param registrationId identyfikator zgłoszenia zawodnika
+     * @param model          model widoku (atrybut {@code trackPoints})
+     * @return nazwa widoku mapy z trasą
+     */
     @GetMapping("/events/{eventId}/results/{registrationId}")
     public String trackMap(@PathVariable Long eventId,
                            @PathVariable Long registrationId,

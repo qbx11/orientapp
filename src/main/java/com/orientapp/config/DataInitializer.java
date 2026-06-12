@@ -16,6 +16,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Inicjalizator danych demonstracyjnych.
+ * <p>
+ * Uruchamiany jako {@link CommandLineRunner} przy starcie aplikacji. Gdy baza
+ * jest pusta, tworzy konto administratora oraz przykładowy zestaw danych:
+ * zawody, kategorie, zawodników, zgłoszenia, wyniki i punkty trasy GPS.
+ * Login i hasło administratora można nadpisać zmiennymi środowiskowymi
+ * {@code APP_ADMIN_USERNAME} i {@code APP_ADMIN_PASSWORD}.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
